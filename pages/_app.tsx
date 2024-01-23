@@ -40,7 +40,6 @@ function MyApp({Component, ...props}: AppProps): ReactElement {
 					}
 				`}
 			</style>
-			<Meta />
 			<WithMom
 				supportedChains={[mainnet, polygon, localhost]}
 				tokenLists={[

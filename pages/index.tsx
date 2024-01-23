@@ -24,6 +24,7 @@ import {VAULT_LIST} from '@utils/vaultList';
 import {useYDaemonBaseURI} from '@yearn-finance/web-lib/hooks/useYDaemonBaseURI';
 import {useYearnPrices} from '@yearn-finance/web-lib/hooks/useYearnPrices';
 import {yDaemonVaultSchema} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
+import Meta from '@common/Meta';
 
 import type {ReactElement} from 'react';
 import type {TYDaemonPricesChain} from '@yearn-finance/web-lib/utils/schemas/yDaemonPricesSchema';
@@ -270,5 +271,10 @@ function Home(): ReactElement {
 }
 
 export default function Wrapper(): ReactElement {
-	return <Home />;
+	return (
+		<>
+			<Meta />
+			<Home />
+		</>
+	);
 }
