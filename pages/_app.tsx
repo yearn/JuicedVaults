@@ -4,7 +4,6 @@ import {mainnet, polygon} from 'viem/chains';
 import {WalletContextApp} from '@builtbymom/web3/contexts/useWallet';
 import {WithMom} from '@builtbymom/web3/contexts/WithMom';
 import {localhost} from '@yearn-finance/web-lib/utils/wagmi/networks';
-import Meta from '@common/Meta';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
