@@ -45,7 +45,7 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 						)}>
 						<div
 							className={
-								'hidden size-12 items-center justify-center rounded-full border-2 border-neutral-900 md:flex'
+								'hidden size-12 items-center justify-center rounded-full border-2 border-neutral-900 bg-[#FEBC02] md:flex'
 							}>
 							<IconGold className={'size-8'} />
 						</div>
