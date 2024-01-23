@@ -1,46 +1,40 @@
-import type {Dispatch, SetStateAction} from 'react';
-import type {TAddress, TDict, TNDict} from '@yearn-finance/web-lib/types';
-import type {TNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
+import type {TYDaemonVault} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
+import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 
-export type TTokenList = {
+export type TVaultListItem = {
 	name: string;
-	description: string;
-	timestamp: string;
-	logoURI: string;
-	uri: string;
-	keywords: string[];
-	version: {
-		major: number;
-		minor: number;
-		patch: number;
-	};
-	tokens: {
-		address: TAddress;
-		name: string;
-		symbol: string;
-		decimals: number;
-		chainId: number;
-		logoURI?: string;
-	}[];
-};
-
-export type TToken = {
-	address: TAddress;
-	name: string;
-	symbol: string;
+	tokenSymbol: string;
 	decimals: number;
 	chainID: number;
-	logoURI?: string;
-	value: number;
-	price: TNormalizedBN;
-	balance: TNormalizedBN;
+	vaultAddress: TAddress;
+	tokenAddress: TAddress;
+	stakingAddress: TAddress;
+	rewardAddress: TAddress;
+	autoCompoundingAddress: TAddress;
 };
-export type TChainTokens = TNDict<TDict<TToken>>;
 
-export type TComboboxAddressInput = {
-	value: TToken | null;
-	possibleValues: TDict<TToken>;
-	onChangeValue: (value: TToken) => void;
-	onAddValue: Dispatch<SetStateAction<TDict<TToken>>>;
-	shouldSort?: boolean;
+export type TPriceData = {
+	underlyingToken: TNormalizedBN;
+	vaultToken: TNormalizedBN;
+	rewardToken: TNormalizedBN;
+};
+
+export type TVaultData = TVaultListItem & {
+	onChainData:
+		| {
+				totalVaultSupply: TNormalizedBN;
+				vaultBalanceOf: TNormalizedBN;
+				tokenBalanceOf: TNormalizedBN;
+				totalStakingSupply: TNormalizedBN;
+				stakingBalanceOf: TNormalizedBN;
+				rewardEarned: TNormalizedBN;
+
+				autoCoumpoundingVaultSupply: TNormalizedBN;
+				autoCoumpoundingVaultBalance: TNormalizedBN;
+				stakingAPR: number;
+		  }
+		| undefined;
+	prices: TPriceData | undefined;
+	yDaemonData: TYDaemonVault;
+	yDaemonAutoCompoundingData: TYDaemonVault | undefined;
 };

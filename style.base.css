@@ -27,21 +27,8 @@
 	--default-rounded: 6px;
 }
 
-:root.dark {
-	--color-neutral-900: 229 34% 100%;
-	--color-neutral-800: 229 34% 96%;
-	--color-neutral-600: 229 34% 90%;
-	--color-neutral-500: 229 34% 90%;
-	--color-neutral-400: 229 34% 48%;
-	--color-neutral-300: 229 34% 36%;
-	--color-neutral-200: 229 34% 24%;
-	--color-neutral-100: 229 34% 16%;
-	--color-neutral-50: 229 34% 8%;
-	--color-neutral-0: 229 34% 13%;
-}
-
 body {
-	@apply text-neutral-900;
+	@apply text-neutral-900 bg-[#F1EBD9];
 }
 h1 {
 	@apply text-xl font-bold text-neutral-900;
@@ -103,85 +90,6 @@ label[aria-invalid='true'] {
 }
 
 /* 🔵 - Yearn Finance ******************************************************
-** First, we are declaring the Yearn's specific class for the components.
-** We need to declare them first in order to work with css inheritence
-** correctly. Aka theses class should be possible to overwrite by adding an
-** extra tailwind class
-**************************************************************************/
-.flex-center {
-	@apply flex justify-center items-center;
-}
-.rounded-default {
-	@apply rounded-md;
-}
-.rounded-b-default {
-	@apply rounded-b-md;
-}
-.rounded-t-default {
-	@apply rounded-t-md;
-}
-.rounded-l-default {
-	@apply rounded-l-md;
-}
-.rounded-r-default {
-	@apply rounded-r-md;
-}
-
-/* -- Button.tsx ------------------------------------------------------- */
-.yearn--button {
-	@apply cursor-pointer px-4 flex justify-center items-center h-10 text-sm transition-all relative;
-
-	border-radius: var(--default-rounded);
-
-	&[data-variant='filled'] {
-		@apply text-primary-0 bg-primary-900 font-normal border border-transparent;
-		&:disabled {
-			@apply bg-primary-700 opacity-40;
-		}
-		&:not(:disabled):not([aria-busy='true']):hover {
-			@apply bg-primary-800;
-		}
-	}
-	&[data-variant='light'] {
-		@apply text-primary-900 bg-primary-100 border border-transparent;
-		&:disabled {
-			@apply opacity-40;
-		}
-		&:not(:disabled):not([aria-busy='true']):hover {
-			@apply bg-primary-200;
-		}
-	}
-	&[data-variant='outlined'] {
-		@apply text-primary-900 bg-transparent border border-primary-900;
-		&:disabled {
-			@apply opacity-40;
-		}
-		&:not(:disabled):not([aria-busy='true']):hover {
-			@apply bg-primary-900 text-primary-0;
-		}
-	}
-	&[data-variant='reverted'] {
-		@apply text-primary-900 bg-primary-0 font-normal border border-transparent;
-		&:disabled {
-			@apply bg-primary-200 opacity-40;
-		}
-		&:not(:disabled):not([aria-busy='true']):hover {
-			@apply bg-primary-200;
-		}
-		&[aria-busy='true'] svg {
-			@apply text-primary-900;
-		}
-	}
-	&[aria-busy='true'] {
-		@apply cursor-wait;
-		color: transparent !important;
-	}
-	&:disabled {
-		@apply cursor-not-allowed;
-	}
-}
-
-/* 🔵 - Yearn Finance ******************************************************
 ** Then, we import the tailwind class. They will be able to overwrite all
 ** the previous classes, not the next ones directly.
 **************************************************************************/
@@ -191,46 +99,8 @@ label[aria-invalid='true'] {
 /* 🔵 - Yearn Finance ******************************************************
 ** Shorthand for some group of style used across the application
 ***************************************************************************/
-.flex-row-center {
-	@apply flex flex-row items-center;
-}
-.flex-row-start {
-	@apply flex flex-row items-start;
-}
-.flex-col-start {
-	@apply flex flex-col items-start;
-}
-.flex-col-full {
-	@apply flex flex-col w-full h-full;
-}
 .max-w-6xl {
 	@apply max-w-[1232px] px-4;
-}
-
-/* 🔵 - Yearn Finance ******************************************************
-** NsProgress is used to display the loading indicator. All of theses
-** styles are required to make it visible
-**************************************************************************/
-.nprogress-custom-parent {
-	@apply overflow-hidden relative;
-}
-.nprogress-custom-parent #nprogress .spinner {
-	@apply absolute;
-}
-.nprogress-custom-parent #nprogress .bar {
-	@apply absolute;
-}
-#nprogress {
-	@apply pointer-events-none;
-}
-#nprogress .bar {
-	@apply bg-neutral-900 fixed top-0 left-0 w-full h-1 z-[1031];
-}
-#nprogress .spinner {
-	@apply block fixed z-[1031] top-4 right-4;
-}
-#nprogress .spinner-icon {
-	@apply hidden;
 }
 
 /* 🔵 - Yearn Finance ******************************************************
@@ -243,151 +113,7 @@ label[aria-invalid='true'] {
 	-ms-overflow-style: none; /* IE and Edge */
 	scrollbar-width: none; /* Firefox */
 }
-.yearn--select-reset {
-	@apply bg-transparent p-0 border-none;
-	&:focus {
-		outline: none;
-		box-shadow: none;
-	}
-}
-.yearn--select-no-arrow {
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	background-image: none;
-}
-.yearn--select-no-arrow::-ms-expand {
-	display: none;
-}
 
-/* 🔵 - Yearn Finance ******************************************************
-** Some custom css for the components
-**************************************************************************/
-.img-gradient::after {
-	content: '';
-	background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
-	@apply absolute inset-0 w-full h-full;
-}
-
-/* 🔵 - Yearn Finance ******************************************************
-** Header an navbar
-**************************************************************************/
-.yearn--header {
-	@apply inset-x-0 top-0 z-50 mb-5 flex h-20 w-full max-w-[1200px] flex-row items-center justify-between p-4 text-xs sm:text-sm md:inset-x-auto md:mb-0 md:px-0 md:text-base;
-}
-.yearn--nav {
-	@apply hidden w-1/3 flex-row items-center space-x-3 md:flex md:space-x-6;
-}
-.yearn--header-nav-item {
-	@apply relative cursor-pointer transition-colors text-neutral-500 hover:text-neutral-900 font-normal text-sm;
-
-	&.active {
-		@apply text-neutral-900 font-bold;
-	}
-}
-
-/* 🔵 - Yearn Finance ******************************************************
-** Dropdown menu and listbox
-**************************************************************************/
-.yearn--dropdown-menu {
-	--dropdown-bg-color: hsl(var(--color-neutral-100));
-	--dropdown-bg-color-active: hsl(var(--color-neutral-600));
-	--dropdown-border-width: 0px;
-	--dropdown-border-color: transparent;
-
-	@apply flex overflow-y-auto absolute left-0 flex-col mt-1 w-full min-w-fit max-h-60 scrollbar-none text-neutral-400 border border-neutral-300 bg-neutral-100;
-}
-.yearn--dropdown-menu-item {
-	@apply w-full flex flex-row items-center cursor-pointer py-2 pr-4 pl-3 transition-colors;
-	&[data-active='true'] {
-		@apply bg-neutral-0/40;
-	}
-}
-.yearn--listbox-menu {
-	@apply flex overflow-y-auto absolute left-0 flex-col mt-1 w-full min-w-fit max-h-60 scrollbar-none text-neutral-900 bg-neutral-0;
-}
-.yearn--listbox-menu-item {
-	@apply w-full flex flex-row items-center cursor-pointer py-2 pr-4 pl-3 transition-colors;
-	&[data-active='true'] {
-		@apply bg-neutral-0/40;
-	}
-}
-
-.yearn--modal-wrapper {
-	@apply flex justify-center items-end px-4 pt-4 pb-20 min-h-screen text-center sm:block sm:p-0;
-}
-.yearn--modal-overlay {
-	@apply fixed inset-0 z-10 bg-neutral-900/60 transition-opacity;
-}
-:root.dark {
-	& .yearn--modal-overlay {
-		@apply bg-neutral-100/90;
-	}
-}
-.yearn--modal {
-	@apply inline-block overflow-hidden relative z-50 w-full text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle md:mb-96 bg-neutral-0;
-
-	border-radius: var(--default-rounded);
-}
-.yearn--modalLogin-wrapper {
-}
-.yearn--modalLogin-card {
-	@apply flex flex-col justify-center items-center p-6 text-center transition-colors cursor-pointer bg-neutral-0 hover:bg-neutral-100;
-
-	border-radius: var(--default-rounded);
-	& > div > svg {
-		@apply w-12 h-12;
-	}
-	& > b {
-		@apply mt-2 text-lg text-neutral-700;
-	}
-	& > p {
-		@apply text-neutral-500;
-	}
-}
-.yearn--modalLogin {
-	@apply grid grid-cols-2;
-}
-
-/* 🔵 - Yearn Finance ******************************************************
-** Misc
-**************************************************************************/
-.yearn--button-smaller {
-	@apply h-8 text-xs py-2 w-16 px-2;
-}
-.yearn--modalMobileMenu-childrenWrapper > a {
-	&:last-child > .mobile-nav-item {
-		@apply border-b-0;
-	}
-}
-.yearn--sort-chevron {
-	@apply h-4 w-4 min-w-[16px] cursor-pointer text-neutral-500;
-}
-.yearn--sort-chevron--off {
-	@apply h-4 w-4 min-w-[16px] cursor-pointer transition-colors text-neutral-300 group-hover:text-neutral-500;
-}
-
-:root.dark {
-	& .yearn--sort-chevron--off {
-		@apply text-neutral-200;
-	}
-}
-
-.mobile-nav-item {
-	@apply flex flex-col items-start justify-between rounded-md bg-neutral-100;
-	& > p {
-		@apply p-2 text-base font-bold text-neutral-900;
-	}
-}
-.mobile-nav-item {
-	@apply rounded-none border-b border-neutral-300 bg-neutral-100/60;
-}
-
-.tab {
-	@apply font-normal text-neutral-600 transition-colors hover:text-neutral-900 cursor-pointer border-b-2 border-transparent pb-4 z-20;
-	&[aria-selected='true'] {
-		@apply font-bold text-neutral-900 border-neutral-900;
-	}
-}
 .hover-fix::before {
 	display: block;
 	content: attr(title);
@@ -397,29 +123,12 @@ label[aria-invalid='true'] {
 	visibility: hidden;
 }
 
-.yearn--toast-options {
-	@apply !w-screen text-sm text-neutral-700 !px-4 !rounded-none !shadow-none !py-2 !max-w-full;
-}
-
-.yearn--toast-button {
-	@apply text-xs px-3 py-1 text-[#0657F9] bg-white;
-}
-
-.yearn--shadow {
-	box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.16);
-}
-
-:root.dark {
-	& .yearn--shadow {
-		@apply border-solid border border-neutral-200;
-	}
-}
-
 .font-number {
 	@apply font-mono tabular-nums;
 }
 
 [type='text']:focus,
+input:where(:not([type])):focus,
 [type='email']:focus,
 [type='url']:focus,
 [type='password']:focus,

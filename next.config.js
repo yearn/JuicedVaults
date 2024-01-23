@@ -40,13 +40,15 @@ module.exports = phase =>
 				10: process.env.RPC_URL_OPTIMISM,
 				137: process.env.RPC_URL_POLYGON,
 				250: process.env.RPC_URL_FANTOM,
-				1337: 'http://localhost:8080',
+				1337: 'http://localhost:8545',
 				42161: process.env.RPC_URL_ARBITRUM
 			},
 			ALCHEMY_KEY: process.env.ALCHEMY_KEY,
 			INFURA_KEY: process.env.INFURA_KEY,
+			YDAEMON_BASE_URI: process.env.YDAEMON_BASE_URI,
 			RPC_URL_OPTIMISM_YEARN: process.env.RPC_URL_OPTIMISM_YEARN,
 			WALLETCONNECT_PROJECT_ID: process.env.WALLETCONNECT_PROJECT_ID,
-			SMOL_ASSETS_URL: 'https://assets.smold.app/api'
+			SMOL_ASSETS_URL: 'https://assets.smold.app/api',
+			DEFAULT_CHAIN_ID: 1
 		}
 	});

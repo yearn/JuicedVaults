@@ -1,12 +1,12 @@
 {
-	"name": "Dump Services",
-	"short_name": "Dump.Services",
-	"description": "Dump your tokens like a pro",
+	"name": "Juiced",
+	"short_name": "Juiced",
+	"description": "Freshly squeezed and bursting with yield.",
 	"locale": "en-US",
-	"uri": "https://dump.services/",
-	"og": "https://dump.services/og.png",
-	"iconPath": "https://dump.services/favicons/favicon.svg",
-	"twitter": "@smoldapp",
+	"uri": "https://juiced.yearn.fi/",
+	"og": "https://juiced.yearn.fi/og.png",
+	"iconPath": "https://juiced.yearn.fi/favicons/favicon.svg",
+	"twitter": "@yearnfi",
 	"icons": [
 		{
 			"src": "/favicons/android-icon-192x192.png",

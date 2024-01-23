@@ -1,84 +1,137 @@
-import {erc20ABI, readContract} from '@wagmi/core';
-import {MAX_UINT_256} from '@yearn-finance/web-lib/utils/constants';
-import {toBigInt} from '@yearn-finance/web-lib/utils/format.bigNumber';
-import {handleTx, toWagmiProvider} from '@yearn-finance/web-lib/utils/wagmi/provider';
-import {assertAddress} from '@yearn-finance/web-lib/utils/wagmi/utils';
+import {assert, assertAddress} from '@builtbymom/web3/utils';
+import {handleTx, toWagmiProvider} from '@builtbymom/web3/utils/wagmi/provider';
 
-import type {Connector} from 'wagmi';
-import type {TAddress} from '@yearn-finance/web-lib/types';
-import type {TWriteTransaction} from '@yearn-finance/web-lib/utils/wagmi/provider';
-import type {TTxResponse} from '@yearn-finance/web-lib/utils/web3/transaction';
+import {YVAULT_STAKING_ABI} from './abi/yVaultStaking.abi';
+import {YVAULT_V3_ABI} from './abi/yVaultV3.abi';
 
-//Because USDT do not return a boolean on approve, we need to use this ABI
-const ALTERNATE_ERC20_APPROVE_ABI = [
-	{
-		constant: false,
-		inputs: [
-			{name: '_spender', type: 'address'},
-			{name: '_value', type: 'uint256'}
-		],
-		name: 'approve',
-		outputs: [],
-		payable: false,
-		stateMutability: 'nonpayable',
-		type: 'function'
-	}
-] as const;
+import type {TTxResponse} from '@builtbymom/web3/utils/wagmi';
+import type {TWriteTransaction} from '@builtbymom/web3/utils/wagmi/provider';
 
-/******************************************************************************
- ** isApprovedERC20 is a _VIEW_ function that checks if a token is approved for
- ** a spender.
- ******************************************************************************/
-type TIsApprovedERC20 = {
-	connector: Connector | undefined;
-	chainID: number;
-	contractAddress: TAddress;
-	spenderAddress: TAddress;
-	amount?: bigint;
-};
-export async function isApprovedERC20(props: TIsApprovedERC20): Promise<boolean> {
-	const wagmiProvider = await toWagmiProvider(props.connector);
-	const result = await readContract({
-		...wagmiProvider,
-		abi: erc20ABI,
-		chainId: props.chainID,
-		address: props.contractAddress,
-		functionName: 'allowance',
-		args: [wagmiProvider.address, props.spenderAddress]
-	});
-	return (result || 0n) >= toBigInt(props.amount || MAX_UINT_256);
-}
-
-/******************************************************************************
- ** approveERC20 is a _WRITE_ function that approves a token for a spender.
+/* 🔵 - Yearn Finance **********************************************************
+ ** redeemV3Shares is a _WRITE_ function that withdraws a share of underlying
+ ** collateral from a v3 vault.
  **
- ** @param spenderAddress - The address of the spender.
- ** @param amount - The amount of collateral to deposit.
+ ** @app - Vaults
+ ** @param amount - The amount of ETH to withdraw.
  ******************************************************************************/
-type TApproveERC20 = TWriteTransaction & {
-	spenderAddress: TAddress | undefined;
+type TRedeemV3Shares = TWriteTransaction & {
 	amount: bigint;
 };
-export async function approveERC20(props: TApproveERC20): Promise<TTxResponse> {
-	assertAddress(props.spenderAddress, 'spenderAddress');
+export async function redeemV3Shares(props: TRedeemV3Shares): Promise<TTxResponse> {
+	assert(props.amount > 0n, 'Amount is 0');
 	assertAddress(props.contractAddress);
-
-	props.onTrySomethingElse = async (): Promise<TTxResponse> => {
-		assertAddress(props.spenderAddress, 'spenderAddress');
-		return await handleTx(props, {
-			address: props.contractAddress,
-			chainId: props.chainID,
-			abi: ALTERNATE_ERC20_APPROVE_ABI,
-			functionName: 'approve',
-			args: [props.spenderAddress, props.amount]
-		});
-	};
+	const wagmiProvider = await toWagmiProvider(props.connector);
+	assertAddress(wagmiProvider.address, 'wagmiProvider.address');
 
 	return await handleTx(props, {
 		address: props.contractAddress,
-		chainId: props.chainID,
-		abi: erc20ABI,
-		functionName: 'approve',
-		args: [props.spenderAddress, props.amount]
+		abi: YVAULT_V3_ABI,
+		functionName: 'redeem',
+		args: [props.amount, wagmiProvider.address, wagmiProvider.address]
+	});
+}
+
+/* 🔵 - Yearn Finance **********************************************************
+ ** depositERC20 is a _WRITE_ function that deposits an ERC20 token into a
+ ** vault.
+ **
+ ** @app - Vaults
+ ** @param amount - The amount of ERC20 to deposit.
+ ******************************************************************************/
+type TDepositERC20Args = TWriteTransaction & {
+	amount: bigint;
+};
+export async function depositERC20(props: TDepositERC20Args): Promise<TTxResponse> {
+	assertAddress(props.contractAddress);
+	assert(props.amount > 0n, 'Amount is 0');
+	assert(props.connector, 'No connector');
+
+	const wagmiProvider = await toWagmiProvider(props.connector);
+	return await handleTx(props, {
+		address: props.contractAddress,
+		abi: YVAULT_V3_ABI,
+		functionName: 'deposit',
+		args: [props.amount, wagmiProvider.address]
+	});
+}
+
+/* 🔵 - Yearn Finance **********************************************************
+ ** stakeERC20 is a _WRITE_ function that deposits an ERC20 token into a
+ ** staking contract.
+ **
+ ** @app - Vaults
+ ** @param amount - The amount of ERC20 to stake.
+ ******************************************************************************/
+type TStakeERC20Args = TWriteTransaction & {
+	amount: bigint;
+};
+export async function stakeERC20(props: TStakeERC20Args): Promise<TTxResponse> {
+	assertAddress(props.contractAddress);
+	assert(props.amount > 0n, 'Amount is 0');
+	assert(props.connector, 'No connector');
+
+	return await handleTx(props, {
+		address: props.contractAddress,
+		abi: YVAULT_STAKING_ABI,
+		functionName: 'stake',
+		args: [props.amount]
+	});
+}
+
+/* 🔵 - Yearn Finance **********************************************************
+ ** exit is a _WRITE_ function that withdraw all staked ERC20 tokens from a
+ ** staking contract, and claims any rewards.
+ **
+ ** @app - Vaults
+ ******************************************************************************/
+type TExit = TWriteTransaction;
+export async function exit(props: TExit): Promise<TTxResponse> {
+	assert(props.connector, 'No connector');
+	assertAddress(props.contractAddress, 'contractAddress');
+
+	return await handleTx(props, {
+		address: props.contractAddress,
+		abi: YVAULT_STAKING_ABI,
+		functionName: 'exit'
+	});
+}
+
+/* 🔵 - Yearn Finance **********************************************************
+ ** unstakeSome is a _WRITE_ function that withdraw some staked ERC20 tokens
+ ** from a staking contract.
+ **
+ ** @app - Vaults
+ ******************************************************************************/
+type TUnstake = TWriteTransaction & {
+	amount: bigint;
+};
+export async function unstakeSome(props: TUnstake): Promise<TTxResponse> {
+	assert(props.connector, 'No connector');
+	assert(props.amount > 0n, 'Amount is 0');
+	assertAddress(props.contractAddress, 'contractAddress');
+
+	return await handleTx(props, {
+		address: props.contractAddress,
+		abi: YVAULT_STAKING_ABI,
+		functionName: 'withdraw',
+		args: [props.amount]
+	});
+}
+
+/* 🔵 - Yearn Finance **********************************************************
+ ** claimRewards is a _WRITE_ function that claims any rewards from a staking
+ ** contract.
+ **
+ ** @app - Vaults
+ ******************************************************************************/
+type TClaimRewards = TWriteTransaction;
+export async function claimRewards(props: TClaimRewards): Promise<TTxResponse> {
+	assert(props.connector, 'No connector');
+	assertAddress(props.contractAddress, 'contractAddress');
+
+	return await handleTx(props, {
+		address: props.contractAddress,
+		abi: YVAULT_STAKING_ABI,
+		functionName: 'getReward'
 	});
 }

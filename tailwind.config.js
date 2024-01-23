@@ -79,8 +79,8 @@ module.exports = {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['var(--inter-font)', 'Inter', 'Roboto', ...defaultTheme.fontFamily.sans],
-				mono: ['Source Code Pro', ...defaultTheme.fontFamily.mono]
+				aeonik: ['var(--font-aeonik)', 'Aeonik', ...defaultTheme.fontFamily.sans],
+				mono: ['Aeonik Fono', ...defaultTheme.fontFamily.mono]
 			},
 			width: {
 				inherit: 'inherit'
@@ -114,7 +114,6 @@ module.exports = {
 		}
 	},
 	plugins: [
-		require('@tailwindcss/forms'),
 		require('@tailwindcss/typography'),
 		plugin(function ({addUtilities}) {
 			addUtilities({
