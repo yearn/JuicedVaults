@@ -201,10 +201,10 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 
 	return (
 		<div className={'mb-16'}>
-			<div className={'rounded-2xl bg-neutral-800 pb-2 pr-2'}>
+			<div className={'flex rounded-2xl bg-neutral-800 pb-2 pr-2'}>
 				<div
 					className={cl(
-						'relative -ml-2 -mt-2 rounded-2xl border-2 border-neutral-900 bg-[#EAE3CE]',
+						'-mt-2 -ml-2 rounded-2xl border-2 border-neutral-900 bg-[#EAE3CE]',
 						'grid grid-cols-1 gap-x-0 md:grid-cols-2 md:gap-x-6'
 					)}>
 					<VaultBasicDeposit

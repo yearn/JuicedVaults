@@ -259,6 +259,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
 	const hasVaultTokens =
 		props.vault.onChainData?.vaultBalanceOf?.raw !== 0n ||
+		props.vault.onChainData?.stakingBalanceOf?.raw !== 0n ||
 		props.vault.onChainData?.autoCoumpoundingVaultBalance?.raw !== 0n;
 
 	return (

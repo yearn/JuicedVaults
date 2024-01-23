@@ -371,7 +371,9 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 
 export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
 	const hasVaultTokens =
-		props.vault.onChainData?.vaultBalanceOf?.raw !== 0n || props.vault.onChainData?.stakingBalanceOf?.raw !== 0n;
+		props.vault.onChainData?.vaultBalanceOf?.raw !== 0n ||
+		props.vault.onChainData?.stakingBalanceOf?.raw !== 0n ||
+		props.vault.onChainData?.autoCoumpoundingVaultBalance?.raw !== 0n;
 
 	return (
 		<div className={'p-2 pt-[30px] md:p-8'}>
