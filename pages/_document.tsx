@@ -1,5 +1,6 @@
 import React from 'react';
 import Document, {Head, Html, Main, NextScript} from 'next/document';
+import Meta from '@common/Meta';
 
 import type {DocumentContext, DocumentInitialProps} from 'next/document';
 import type {ReactElement} from 'react';
@@ -14,19 +15,7 @@ class MyDocument extends Document {
 		return (
 			<Html lang={'en'}>
 				<Head>
-					<link
-						rel={'preconnect'}
-						href={'https://fonts.googleapis.com'}
-					/>
-					<link
-						rel={'preconnect'}
-						href={'https://fonts.gstatic.com'}
-						crossOrigin={'anonymous'}
-					/>
-					<link
-						href={'https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap'}
-						rel={'stylesheet'}
-					/>
+					<Meta />
 				</Head>
 				<body>
 					<Main />
