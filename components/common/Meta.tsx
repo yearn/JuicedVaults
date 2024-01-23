@@ -1,6 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
-import {DefaultSeo} from 'next-seo';
+import {NextSeo} from 'next-seo';
 
 import meta from '../../public/manifest.json';
 
@@ -140,7 +140,7 @@ function Meta(): ReactElement {
 				/>
 				<meta charSet={'utf-8'} />
 			</Head>
-			<DefaultSeo
+			<NextSeo
 				title={meta.name}
 				defaultTitle={meta.name}
 				description={meta.description}
