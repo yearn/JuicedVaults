@@ -16,7 +16,7 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 		<div className={'p-4 md:p-6'}>
 			<div
 				className={cl(
-					'relative rounded-2xl border-2 border-neutral-900',
+					'relative border-2 rounded-2xl border-neutral-900 overflow-hidden',
 					selectedTab === 0 ? 'bg-[#6382FF]' : 'bg-[#FF7D01]'
 				)}>
 				<div className={'grid grid-cols-2'}>
@@ -24,7 +24,7 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 						onClick={() => set_selectedTab(0)}
 						className={cl(
 							'flex space-x-2 items-center',
-							'w-full rounded-2xl rounded-bl-none rounded-tr-none border-b-2 border-r-2 p-2 md:px-8 py-4 text-left',
+							'w-full rounded-2xl rounded-tl-none rounded-bl-none rounded-tr-none border-b-2 border-r-2 p-2 md:px-8 py-4 text-left',
 							selectedTab === 0 ? 'border-transparent' : 'bg-[#6382FF] border-neutral-900'
 						)}>
 						<div
@@ -40,7 +40,7 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 						onClick={() => set_selectedTab(1)}
 						className={cl(
 							'flex space-x-2 items-center',
-							'w-full rounded-2xl rounded-br-none rounded-tl-none border-b-2 border-l-2 p-2 md:px-8 py-4 text-left',
+							'w-full rounded-2xl rounded-br-none rounded-tl-none rounded-tr-none border-b-2 border-l-2 p-2 md:px-8 py-4 text-left',
 							selectedTab === 1 ? 'border-transparent' : 'bg-[#FF7D01] border-neutral-900'
 						)}>
 						<div
