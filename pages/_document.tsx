@@ -1,5 +1,5 @@
 import React from 'react';
-import Document, {Html, Main, NextScript} from 'next/document';
+import Document, {Head, Html, Main, NextScript} from 'next/document';
 import Meta from '@common/Meta';
 
 import type {DocumentContext, DocumentInitialProps} from 'next/document';
@@ -14,7 +14,9 @@ class MyDocument extends Document {
 	render(): ReactElement {
 		return (
 			<Html lang={'en'}>
-				<Meta />
+				<Head>
+					<Meta />
+				</Head>
 				<body>
 					<Main />
 					<NextScript />
