@@ -449,7 +449,9 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 		<div className={'grid md:hidden'}>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4'}>
 				<div className={'flex items-center justify-between'}>
-					<p className={'block text-sm text-neutral-900'}>
+					<p
+						suppressHydrationWarning
+						className={'block text-sm text-neutral-900'}>
 						{'Extra Ajna: '}
 						{getVaultAPR(props?.vault?.yDaemonData)}
 						{' +'}
