@@ -23,12 +23,15 @@ export async function redeemV3Shares(props: TRedeemV3Shares): Promise<TTxRespons
 	const wagmiProvider = await toWagmiProvider(props.connector);
 	assertAddress(wagmiProvider.address, 'wagmiProvider.address');
 
-	return await handleTx(props, {
-		address: props.contractAddress,
-		abi: YVAULT_V3_ABI,
-		functionName: 'redeem',
-		args: [props.amount, wagmiProvider.address, wagmiProvider.address]
-	});
+	return await handleTx(
+		{...props, shouldDisplayErrorToast: true, shouldDisplaySuccessToast: false},
+		{
+			address: props.contractAddress,
+			abi: YVAULT_V3_ABI,
+			functionName: 'redeem',
+			args: [props.amount, wagmiProvider.address, wagmiProvider.address]
+		}
+	);
 }
 
 /* 🔵 - Yearn Finance **********************************************************
@@ -47,12 +50,15 @@ export async function depositERC20(props: TDepositERC20Args): Promise<TTxRespons
 	assert(props.connector, 'No connector');
 
 	const wagmiProvider = await toWagmiProvider(props.connector);
-	return await handleTx(props, {
-		address: props.contractAddress,
-		abi: YVAULT_V3_ABI,
-		functionName: 'deposit',
-		args: [props.amount, wagmiProvider.address]
-	});
+	return await handleTx(
+		{...props, shouldDisplayErrorToast: true, shouldDisplaySuccessToast: false},
+		{
+			address: props.contractAddress,
+			abi: YVAULT_V3_ABI,
+			functionName: 'deposit',
+			args: [props.amount, wagmiProvider.address]
+		}
+	);
 }
 
 /* 🔵 - Yearn Finance **********************************************************
@@ -70,12 +76,15 @@ export async function stakeERC20(props: TStakeERC20Args): Promise<TTxResponse> {
 	assert(props.amount > 0n, 'Amount is 0');
 	assert(props.connector, 'No connector');
 
-	return await handleTx(props, {
-		address: props.contractAddress,
-		abi: YVAULT_STAKING_ABI,
-		functionName: 'stake',
-		args: [props.amount]
-	});
+	return await handleTx(
+		{...props, shouldDisplayErrorToast: true, shouldDisplaySuccessToast: false},
+		{
+			address: props.contractAddress,
+			abi: YVAULT_STAKING_ABI,
+			functionName: 'stake',
+			args: [props.amount]
+		}
+	);
 }
 
 /* 🔵 - Yearn Finance **********************************************************
@@ -89,11 +98,14 @@ export async function exit(props: TExit): Promise<TTxResponse> {
 	assert(props.connector, 'No connector');
 	assertAddress(props.contractAddress, 'contractAddress');
 
-	return await handleTx(props, {
-		address: props.contractAddress,
-		abi: YVAULT_STAKING_ABI,
-		functionName: 'exit'
-	});
+	return await handleTx(
+		{...props, shouldDisplayErrorToast: true, shouldDisplaySuccessToast: false},
+		{
+			address: props.contractAddress,
+			abi: YVAULT_STAKING_ABI,
+			functionName: 'exit'
+		}
+	);
 }
 
 /* 🔵 - Yearn Finance **********************************************************
@@ -110,12 +122,15 @@ export async function unstakeSome(props: TUnstake): Promise<TTxResponse> {
 	assert(props.amount > 0n, 'Amount is 0');
 	assertAddress(props.contractAddress, 'contractAddress');
 
-	return await handleTx(props, {
-		address: props.contractAddress,
-		abi: YVAULT_STAKING_ABI,
-		functionName: 'withdraw',
-		args: [props.amount]
-	});
+	return await handleTx(
+		{...props, shouldDisplayErrorToast: true, shouldDisplaySuccessToast: false},
+		{
+			address: props.contractAddress,
+			abi: YVAULT_STAKING_ABI,
+			functionName: 'withdraw',
+			args: [props.amount]
+		}
+	);
 }
 
 /* 🔵 - Yearn Finance **********************************************************
@@ -129,9 +144,12 @@ export async function claimRewards(props: TClaimRewards): Promise<TTxResponse> {
 	assert(props.connector, 'No connector');
 	assertAddress(props.contractAddress, 'contractAddress');
 
-	return await handleTx(props, {
-		address: props.contractAddress,
-		abi: YVAULT_STAKING_ABI,
-		functionName: 'getReward'
-	});
+	return await handleTx(
+		{...props, shouldDisplayErrorToast: true, shouldDisplaySuccessToast: false},
+		{
+			address: props.contractAddress,
+			abi: YVAULT_STAKING_ABI,
+			functionName: 'getReward'
+		}
+	);
 }

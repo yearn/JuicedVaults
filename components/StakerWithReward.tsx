@@ -19,7 +19,7 @@ import {handleInputChangeValue} from '@builtbymom/web3/utils/handlers';
 import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {IconBigChevron} from '@icons/IconBigChevron';
 import {IconSpinner} from '@icons/IconSpinner';
-import {claimRewards, exit, redeemV3Shares, stakeERC20} from '@utils/actions';
+import {claimRewards, exit, stakeERC20, unstakeSome} from '@utils/actions';
 import {getVaultAPR} from '@utils/helpers';
 import {Counter} from '@common/Counter';
 
@@ -198,7 +198,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 	);
 
 	const onUnstake = useCallback(async (): Promise<void> => {
-		const result = await redeemV3Shares({
+		const result = await unstakeSome({
 			connector: provider,
 			chainID: props.vault.chainID,
 			amount: toBigInt(amount?.raw),

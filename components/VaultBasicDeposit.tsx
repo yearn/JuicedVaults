@@ -18,7 +18,7 @@ import {handleInputChangeValue} from '@builtbymom/web3/utils/handlers';
 import {approveERC20, defaultTxStatus, getNetwork} from '@builtbymom/web3/utils/wagmi';
 import {IconSpinner} from '@icons/IconSpinner';
 import {depositERC20, redeemV3Shares} from '@utils/actions';
-import {getVaultAPR} from '@utils/helpers';
+import {getVaultAPR, toSafeChainID} from '@utils/helpers';
 import {ImageWithFallback} from '@common/ImageWithFallback';
 
 import type {ChangeEvent, ReactElement} from 'react';
@@ -285,7 +285,7 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 					alt={props.vault.tokenSymbol}
 					width={48}
 					height={48}
-					src={`${process.env.SMOL_ASSETS_URL}/token/${props.vault.chainID}/${props.vault.tokenAddress}/logo-128.png`}
+					src={`${process.env.SMOL_ASSETS_URL}/token/${toSafeChainID(props.vault.chainID)}/${props.vault.tokenAddress}/logo-128.png`}
 					className={'size-8'}
 				/>
 				<b className={'block whitespace-break-spaces text-xl text-neutral-900'}>
