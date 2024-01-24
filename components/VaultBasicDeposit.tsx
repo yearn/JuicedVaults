@@ -71,9 +71,7 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 		if (result.isSuccessful) {
 			onRefreshAllowance();
 			props.onRefreshVaultData();
-			toast.success(
-				`Your ${props.vault.tokenSymbol}s have been approved! You can now deposit them to earn on them!`
-			);
+			toast.success(`Your ${props.vault.tokenSymbol} has been approved. Now it's time to deposit them.`);
 		}
 	}, [approveStatus.pending, provider, props, onRefreshAllowance]);
 
@@ -90,7 +88,7 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 			props.onRefreshVaultData();
 			set_amount(undefined);
 			toast.success(
-				`You successfully deposited ${amount?.normalized} ${props.vault.tokenSymbol}! You can now stake them to earn some juicy extra rewards!`
+				`You successfully deposited ${amount?.normalized} ${props.vault.tokenSymbol}. Now stake them for more APR or more AJNA`
 			);
 		}
 	}, [provider, props, amount?.raw, amount?.normalized, onRefreshAllowance]);
@@ -177,7 +175,7 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 				}
 				onClick={() => set_amount(props.vault?.onChainData?.tokenBalanceOf || toNormalizedBN(0))}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`${formatAmount(props.vault?.onChainData?.tokenBalanceOf?.normalized || 0, 4)} available to deposit`}
+				{`${formatAmount(props.vault?.onChainData?.tokenBalanceOf?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to deposit`}
 			</button>
 		</div>
 	);
@@ -206,9 +204,9 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 		if (result.isSuccessful) {
 			props.onRefreshVaultData();
 			set_amount(undefined);
-			toast.success(`You successfully withdrew ${amount?.normalized} yv${props.vault.tokenSymbol}s!`);
+			toast.success(`You successfully withdrew your ${props.vault.tokenSymbol}.`);
 		}
-	}, [provider, props, amount?.raw, amount?.normalized]);
+	}, [provider, props, amount?.raw]);
 
 	return (
 		<div className={'pt-6'}>
@@ -263,9 +261,7 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 	);
 }
 
-export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
-	const blockExplorer = getNetwork(props.vault.chainID).blockExplorers?.etherscan?.url;
-
+export function DesktopStats(props: {vault: TVaultData}): ReactElement {
 	const depositedAndStaked = useMemo((): number => {
 		return (
 			(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0) +
@@ -279,6 +275,95 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 	]);
 
 	return (
+		<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4 leading-4'}>
+				<b className={'block pb-2 text-beige'}>{'APR'}</b>
+				<b
+					suppressHydrationWarning
+					className={'block text-3xl text-beige'}>
+					{getVaultAPR(props?.vault?.yDaemonData)}
+				</b>
+			</div>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4 leading-4'}>
+				<b className={'block pb-2 text-beige'}>{'TVL'}</b>
+				<b
+					className={'block text-3xl text-beige'}
+					suppressHydrationWarning>
+					{formatWithUnit(
+						(props?.vault?.onChainData?.totalVaultSupply?.normalized || 0) *
+							(props.vault.prices?.underlyingToken?.normalized || 0)
+					)}
+				</b>
+			</div>
+			<div
+				className={cl(
+					'col-span-2 flex items-center justify-between rounded-lg border-2',
+					'leading-4 border-neutral-900 bg-carbon p-4'
+				)}>
+				<b className={'block text-beige'}>{'You deposited'}</b>
+				<b
+					className={'block text-beige'}
+					suppressHydrationWarning>
+					{`${formatAmount(depositedAndStaked, 4)} ${props.vault.tokenSymbol}`}
+				</b>
+			</div>
+		</div>
+	);
+}
+
+export function MobileStats(props: {vault: TVaultData}): ReactElement {
+	const depositedAndStaked = useMemo((): number => {
+		return (
+			(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0) +
+			(props.vault?.onChainData?.stakingBalanceOf?.normalized || 0) +
+			(props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0)
+		);
+	}, [
+		props.vault?.onChainData?.vaultBalanceOf?.normalized,
+		props.vault?.onChainData?.stakingBalanceOf?.normalized,
+		props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized
+	]);
+
+	return (
+		<div className={'grid md:hidden'}>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4'}>
+				<div className={'flex items-center justify-between'}>
+					<p className={'block text-sm text-beige'}>{'APR'}</p>
+					<b
+						className={'block text-beige'}
+						suppressHydrationWarning>
+						{getVaultAPR(props?.vault?.yDaemonData)}
+					</b>
+				</div>
+				<div className={'flex items-center justify-between'}>
+					<p className={'block text-sm text-beige'}>{'TVL'}</p>
+					<b
+						className={'block text-beige'}
+						suppressHydrationWarning>
+						{formatWithUnit(
+							(props?.vault?.onChainData?.totalVaultSupply?.normalized || 0) *
+								(props.vault.prices?.underlyingToken?.normalized || 0)
+						)}
+					</b>
+				</div>
+
+				<div className={'mt-2 flex items-center justify-between border-t border-neutral-0/40 pt-2'}>
+					<p className={'block text-sm text-beige'}>{'Deposited'}</p>
+					<b
+						className={'block text-beige'}
+						suppressHydrationWarning>
+						{`${formatAmount(depositedAndStaked, 4)} ${props.vault.tokenSymbol}`}
+					</b>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
+	const blockExplorer = getNetwork(props.vault.chainID).blockExplorers?.etherscan?.url;
+
+	return (
 		<div className={'relative flex flex-col p-4 md:p-8'}>
 			<div className={'flex flex-row items-center space-x-4 pb-6 pt-4 md:pb-[42px]'}>
 				<ImageWithFallback
@@ -288,8 +373,8 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 					src={`${process.env.SMOL_ASSETS_URL}/token/${toSafeChainID(props.vault.chainID)}/${props.vault.tokenAddress}/logo-128.png`}
 					className={'size-8'}
 				/>
-				<b className={'block whitespace-break-spaces text-xl text-neutral-900'}>
-					{`Deposit ${props.vault.tokenSymbol} and then stake for\n`}
+				<b className={'block whitespace-break-spaces text-lg text-neutral-900 md:text-xl'}>
+					{`Deposit ${props.vault.tokenSymbol} and then stake for `}
 					<span className={'text-blue'}>{'more APR'}</span>
 					{' or '}
 					<span className={'text-orange'}>{'more AJNA'}</span>
@@ -297,75 +382,11 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 				</b>
 			</div>
 
-			<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4 leading-4'}>
-					<b className={'block pb-2 text-beige'}>{'APR'}</b>
-					<b
-						suppressHydrationWarning
-						className={'block text-3xl text-beige'}>
-						{getVaultAPR(props?.vault?.yDaemonData)}
-					</b>
-				</div>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4 leading-4'}>
-					<b className={'block pb-2 text-beige'}>{'TVL'}</b>
-					<b
-						className={'block text-3xl text-beige'}
-						suppressHydrationWarning>
-						{formatWithUnit(
-							(props?.vault?.onChainData?.totalVaultSupply?.normalized || 0) *
-								(props.vault.prices?.underlyingToken?.normalized || 0)
-						)}
-					</b>
-				</div>
-				<div
-					className={cl(
-						'col-span-2 flex items-center justify-between rounded-lg border-2',
-						'leading-4 border-neutral-900 bg-carbon p-4'
-					)}>
-					<b className={'block text-beige'}>{'You deposited'}</b>
-					<b
-						className={'block text-beige'}
-						suppressHydrationWarning>
-						{`${formatAmount(depositedAndStaked, 4)} ${props.vault.tokenSymbol}`}
-					</b>
-				</div>
-			</div>
-
-			<div className={'grid md:hidden'}>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4'}>
-					<div className={'flex items-center justify-between'}>
-						<p className={'block text-sm text-beige'}>{'APR'}</p>
-						<b
-							className={'block text-beige'}
-							suppressHydrationWarning>
-							{getVaultAPR(props?.vault?.yDaemonData)}
-						</b>
-					</div>
-					<div className={'flex items-center justify-between'}>
-						<p className={'block text-sm text-beige'}>{'TVL'}</p>
-						<b
-							className={'block text-beige'}
-							suppressHydrationWarning>
-							{formatWithUnit(
-								(props?.vault?.onChainData?.totalVaultSupply?.normalized || 0) *
-									(props.vault.prices?.underlyingToken?.normalized || 0)
-							)}
-						</b>
-					</div>
-
-					<div className={'mt-2 flex items-center justify-between border-t border-neutral-0/40 pt-2'}>
-						<p className={'block text-sm text-beige'}>{'Deposited'}</p>
-						<b
-							className={'block text-beige'}
-							suppressHydrationWarning>
-							{`${formatAmount(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0)} ${props.vault.tokenSymbol}`}
-						</b>
-					</div>
-				</div>
-			</div>
-
+			<DesktopStats {...props} />
+			<MobileStats {...props} />
 			<DepositSection {...props} />
 			<WithdrawSection {...props} />
+
 			<div className={'mt-auto hidden md:block'}>
 				<p className={'text-xs'}>
 					{'Contract: '}

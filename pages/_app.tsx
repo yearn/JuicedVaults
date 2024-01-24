@@ -58,7 +58,7 @@ function MyApp({Component, ...props}: AppProps): ReactElement {
 						<main className={`relative mx-auto mb-0 flex min-h-screen w-full flex-col ${aeonik.variable}`}>
 							<Component {...props} />
 							<div className={'mx-auto flex w-full max-w-6xl justify-center pb-10 text-center'}>
-								<small className={'block w-2/3 text-neutral-400'}>
+								<small className={'block w-full text-xs text-neutral-400 md:w-2/3 md:text-sm'}>
 									{
 										'These Vaults deposit into Ajna, a new protocol. Unlike real juice, these strategies are not 100% liquid. There may be times when you cannot withdraw all of your funds. Proceed with caution.'
 									}

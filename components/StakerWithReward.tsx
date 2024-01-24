@@ -7,7 +7,6 @@ import {
 	assertAddress,
 	cl,
 	formatAmount,
-	formatPercent,
 	formatWithUnit,
 	isZeroAddress,
 	MAX_UINT_256,
@@ -74,7 +73,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 			onRefreshAllowance();
 			props.onRefreshVaultData();
 			toast.success(
-				`Your ${props.vault.tokenSymbol}s have been approved! You can now stake them to earn AJNA tokens!`
+				`You've approved your ${props.vault.tokenSymbol} to stake. Now just click stake and you're good to go.`
 			);
 		}
 	}, [approveStatus.pending, provider, props, onRefreshAllowance]);
@@ -91,9 +90,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 			onRefreshAllowance();
 			props.onRefreshVaultData();
 			set_amount(undefined);
-			toast.success(
-				`You successfully deposited ${amount?.normalized} ${props.vault.tokenSymbol}! Enjoy your rewards!`
-			);
+			toast.success(`You are now staking ${amount?.normalized} ${props.vault.tokenSymbol}. Enjoy your rewards!`);
 		}
 	}, [provider, props, amount?.raw, amount?.normalized, onRefreshAllowance]);
 
@@ -208,9 +205,9 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 		if (result.isSuccessful) {
 			props.onRefreshVaultData();
 			set_amount(undefined);
-			toast.success(`You successfully unstaked ${amount?.normalized} yv${props.vault.tokenSymbol}.`);
+			toast.success('You successfully unstaked.');
 		}
-	}, [provider, props, amount?.raw, amount?.normalized]);
+	}, [provider, props, amount?.raw]);
 
 	return (
 		<div className={'pt-6'}>
@@ -383,6 +380,111 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 	);
 }
 
+function DesktopStats(props: {vault: TVaultData}): ReactElement {
+	const hasVaultTokens =
+		props.vault.onChainData?.vaultBalanceOf?.raw !== 0n ||
+		props.vault.onChainData?.stakingBalanceOf?.raw !== 0n ||
+		props.vault.onChainData?.autoCoumpoundingVaultBalance?.raw !== 0n;
+
+	return (
+		<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4 leading-4'}>
+				<b
+					suppressHydrationWarning
+					className={'block pb-2 text-neutral-900'}>
+					{'Extra Ajna: '}
+					{getVaultAPR(props?.vault?.yDaemonData)}
+					{' +'}
+				</b>
+				<b
+					suppressHydrationWarning
+					className={'block break-all text-3xl text-neutral-900'}>
+					{`${formatWithUnit(Number(props.vault.onChainData?.stakingAPR || 0), 0)}/week`}
+				</b>
+			</div>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4 leading-4'}>
+				<b className={'block pb-2 text-neutral-900'}>{'TVL'}</b>
+				<b
+					className={'block text-3xl text-neutral-900'}
+					suppressHydrationWarning>
+					{formatWithUnit(
+						(props?.vault?.onChainData?.totalStakingSupply?.normalized || 0) *
+							(props.vault.prices?.vaultToken?.normalized || 0)
+					)}
+				</b>
+			</div>
+			{hasVaultTokens ? (
+				<div
+					className={cl(
+						'col-span-2 flex items-center justify-between rounded-lg border-2',
+						'leading-4 border-neutral-900 bg-yellow p-4'
+					)}>
+					<b className={'block text-neutral-900'}>{'You staked'}</b>
+					<b
+						className={'block text-neutral-900'}
+						suppressHydrationWarning>
+						{`${formatAmount(props.vault.onChainData?.stakingBalanceOf?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
+					</b>
+				</div>
+			) : (
+				<div
+					className={cl(
+						'col-span-2 rounded-lg grid gap-5 mb-36',
+						'border-2 border-neutral-900 bg-yellow p-4'
+					)}>
+					<IconBigChevron className={'text-orange'} />
+					<p
+						className={'block text-xl text-neutral-900'}
+						suppressHydrationWarning>
+						{'Deposit on the left and *poof* you can juice your tokens with extra APR or extra AJNA.'}
+					</p>
+				</div>
+			)}
+		</div>
+	);
+}
+
+function MobileStats(props: {vault: TVaultData}): ReactElement {
+	return (
+		<div className={'grid md:hidden'}>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4'}>
+				<div className={'flex items-center justify-between'}>
+					<p className={'block text-sm text-neutral-900'}>
+						{'Extra Ajna: '}
+						{getVaultAPR(props?.vault?.yDaemonData)}
+						{' +'}
+					</p>
+					<b
+						className={'block text-neutral-900'}
+						suppressHydrationWarning>
+						{`${formatWithUnit(Number(props.vault.onChainData?.stakingAPR || 0), 0)}/week`}
+					</b>
+				</div>
+				<div className={'flex items-center justify-between'}>
+					<p className={'block text-sm text-neutral-900'}>{'TVL'}</p>
+					<b
+						className={'block text-neutral-900'}
+						suppressHydrationWarning>
+						{formatWithUnit(
+							(props?.vault?.onChainData?.totalStakingSupply?.normalized || 0) *
+								(props.vault.prices?.vaultToken?.normalized || 0)
+						)}
+					</b>
+				</div>
+
+				<div className={'mt-2 flex items-center justify-between border-t border-neutral-0/40 pt-2'}>
+					<p className={'block text-sm text-neutral-900'}>{'Staked'}</p>
+					<b
+						className={'block text-neutral-900'}
+						suppressHydrationWarning>
+						{`${formatAmount(props.vault.onChainData?.stakingBalanceOf?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
+					</b>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
 	const hasVaultTokens =
 		props.vault.onChainData?.vaultBalanceOf?.raw !== 0n ||
@@ -391,93 +493,8 @@ export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: 
 
 	return (
 		<div className={'p-2 pt-[30px] md:p-8'}>
-			<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4 leading-4'}>
-					<b
-						suppressHydrationWarning
-						className={'block pb-2 text-neutral-900'}>
-						{'Extra Ajna: '}
-						{getVaultAPR(props?.vault?.yDaemonData)}
-						{' +'}
-					</b>
-					<b
-						suppressHydrationWarning
-						className={'block text-3xl text-neutral-900'}>
-						{`${formatWithUnit(Number(props.vault.onChainData?.stakingAPR || 0), 0)}/week`}
-					</b>
-				</div>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4 leading-4'}>
-					<b className={'block pb-2 text-neutral-900'}>{'TVL'}</b>
-					<b
-						className={'block text-3xl text-neutral-900'}
-						suppressHydrationWarning>
-						{formatWithUnit(
-							(props?.vault?.onChainData?.totalStakingSupply?.normalized || 0) *
-								(props.vault.prices?.vaultToken?.normalized || 0)
-						)}
-					</b>
-				</div>
-				{hasVaultTokens ? (
-					<div
-						className={cl(
-							'col-span-2 flex items-center justify-between rounded-lg border-2',
-							'leading-4 border-neutral-900 bg-yellow p-4'
-						)}>
-						<b className={'block text-neutral-900'}>{'You staked'}</b>
-						<b
-							className={'block text-neutral-900'}
-							suppressHydrationWarning>
-							{`${formatAmount(props.vault.onChainData?.stakingBalanceOf?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
-						</b>
-					</div>
-				) : (
-					<div
-						className={cl(
-							'col-span-2 rounded-lg grid gap-5 mb-36',
-							'border-2 border-neutral-900 bg-yellow p-4'
-						)}>
-						<IconBigChevron className={'text-orange'} />
-						<p
-							className={'block text-xl text-neutral-900'}
-							suppressHydrationWarning>
-							{'Deposit on the left and *poof* you can juice your tokens with extra APR or extra AJNA.'}
-						</p>
-					</div>
-				)}
-			</div>
-
-			<div className={'grid md:hidden'}>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4'}>
-					<div className={'flex items-center justify-between'}>
-						<p className={'block text-sm text-neutral-900'}>{'APR'}</p>
-						<b
-							className={'block text-neutral-900'}
-							suppressHydrationWarning>
-							{formatPercent(props.vault.onChainData?.stakingAPR || 0)}
-						</b>
-					</div>
-					<div className={'flex items-center justify-between'}>
-						<p className={'block text-sm text-neutral-900'}>{'TVL'}</p>
-						<b
-							className={'block text-neutral-900'}
-							suppressHydrationWarning>
-							{formatWithUnit(
-								(props?.vault?.onChainData?.totalStakingSupply?.normalized || 0) *
-									(props.vault.prices?.vaultToken?.normalized || 0)
-							)}
-						</b>
-					</div>
-
-					<div className={'mt-2 flex items-center justify-between border-t border-neutral-0/40 pt-2'}>
-						<p className={'block text-sm text-neutral-900'}>{'Deposited'}</p>
-						<b
-							className={'block text-neutral-900'}
-							suppressHydrationWarning>
-							{`${formatAmount(props.vault.onChainData?.stakingBalanceOf?.normalized || 0)} ${props.vault.tokenSymbol}`}
-						</b>
-					</div>
-				</div>
-			</div>
+			<DesktopStats {...props} />
+			<MobileStats {...props} />
 
 			{hasVaultTokens ? (
 				<>

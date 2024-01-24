@@ -72,7 +72,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 			onRefreshAllowance();
 			props.onRefreshVaultData();
 			toast.success(
-				`Your ${props.vault.tokenSymbol}s have been approved! You can now stake them to earn some extra APR!`
+				`Your ${props.vault.tokenSymbol} has been approved. Now click stake and start earning more APR.`
 			);
 		}
 	}, [approveStatus.pending, provider, props, onRefreshAllowance]);
@@ -90,7 +90,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 			props.onRefreshVaultData();
 			set_amount(undefined);
 			toast.success(
-				`You successfully deposited ${amount?.normalized} ${props.vault.tokenSymbol}! Enjoy your juicy exta APR!`
+				`You staked ${amount?.normalized} ${props.vault.tokenSymbol} and are now earning juiced APR.`
 			);
 		}
 	}, [provider, props, amount?.raw, amount?.normalized, onRefreshAllowance]);
@@ -206,9 +206,9 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 		if (result.isSuccessful) {
 			props.onRefreshVaultData();
 			set_amount(undefined);
-			toast.success(`You successfully unstaked ${amount?.normalized} yv${props.vault.tokenSymbol}.`);
+			toast.success(`${props.vault.tokenSymbol} successfully unstaked.`);
 		}
-	}, [provider, props, amount?.raw, amount?.normalized]);
+	}, [provider, props, amount?.raw]);
 
 	return (
 		<div className={'pb-2 pt-6 md:pb-[92px]'}>
@@ -265,6 +265,108 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 	);
 }
 
+function DesktopStats(props: {vault: TVaultData}): ReactElement {
+	const hasVaultTokens =
+		props.vault.onChainData?.vaultBalanceOf?.raw !== 0n ||
+		props.vault.onChainData?.stakingBalanceOf?.raw !== 0n ||
+		props.vault.onChainData?.autoCoumpoundingVaultBalance?.raw !== 0n;
+
+	return (
+		<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4 leading-4'}>
+				<b
+					suppressHydrationWarning
+					className={'block pb-2 text-neutral-900'}>
+					{'Extra APR: '}
+					{getVaultAPR(props?.vault?.yDaemonData)}
+					{' +'}
+				</b>
+				<b
+					suppressHydrationWarning
+					className={'block text-3xl text-neutral-900'}>
+					{getVaultAPR(props?.vault?.yDaemonAutoCompoundingData)}
+				</b>
+			</div>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4 leading-4'}>
+				<b className={'block pb-2 text-neutral-900'}>{'TVL'}</b>
+				<b
+					className={'block text-3xl text-neutral-900'}
+					suppressHydrationWarning>
+					{formatWithUnit(
+						(props?.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized || 0) *
+							(props.vault.prices?.vaultToken?.normalized || 0)
+					)}
+				</b>
+			</div>
+			{hasVaultTokens ? (
+				<div
+					className={cl(
+						'col-span-2 flex items-center justify-between rounded-lg',
+						'leading-4 border-2 border-neutral-900 bg-pink p-4'
+					)}>
+					<b className={'block text-neutral-900'}>{'You staked'}</b>
+					<b
+						className={'block text-neutral-900'}
+						suppressHydrationWarning>
+						{`${formatAmount(props.vault.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
+					</b>
+				</div>
+			) : (
+				<div
+					className={cl('col-span-2 rounded-lg grid gap-5 mb-36', 'border-2 border-neutral-900 bg-pink p-4')}>
+					<IconBigChevron className={'text-blue'} />
+					<p
+						className={'block text-xl text-neutral-900'}
+						suppressHydrationWarning>
+						{'Deposit on the left and *poof* you can juice your tokens with extra APR or extra AJNA.'}
+					</p>
+				</div>
+			)}
+		</div>
+	);
+}
+
+function MobileStats(props: {vault: TVaultData}): ReactElement {
+	return (
+		<div className={'grid md:hidden'}>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4'}>
+				<div className={'flex items-center justify-between'}>
+					<p className={'block text-sm text-neutral-900'}>
+						{'Extra APR: '}
+						{getVaultAPR(props?.vault?.yDaemonData)}
+						{' +'}
+					</p>
+					<b
+						className={'block text-neutral-900'}
+						suppressHydrationWarning>
+						{getVaultAPR(props?.vault?.yDaemonAutoCompoundingData)}
+					</b>
+				</div>
+				<div className={'flex items-center justify-between'}>
+					<p className={'block text-sm text-neutral-900'}>{'TVL'}</p>
+					<b
+						className={'block text-neutral-900'}
+						suppressHydrationWarning>
+						{formatWithUnit(
+							(props?.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized || 0) *
+								(props.vault.prices?.vaultToken?.normalized || 0)
+						)}
+					</b>
+				</div>
+
+				<div className={'mt-2 flex items-center justify-between border-t border-neutral-0/40 pt-2'}>
+					<p className={'block text-sm text-neutral-900'}>{'You staked'}</p>
+					<b
+						className={'block text-neutral-900'}
+						suppressHydrationWarning>
+						{`${formatAmount(props.vault.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
+					</b>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
 	const hasVaultTokens =
 		props.vault.onChainData?.vaultBalanceOf?.raw !== 0n ||
@@ -273,93 +375,8 @@ export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultD
 
 	return (
 		<div className={'p-2 pt-[30px] md:p-8'}>
-			<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4 leading-4'}>
-					<b
-						suppressHydrationWarning
-						className={'block pb-2 text-neutral-900'}>
-						{'Extra APR: '}
-						{getVaultAPR(props?.vault?.yDaemonData)}
-						{' +'}
-					</b>
-					<b
-						suppressHydrationWarning
-						className={'block text-3xl text-neutral-900'}>
-						{getVaultAPR(props?.vault?.yDaemonAutoCompoundingData)}
-					</b>
-				</div>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4 leading-4'}>
-					<b className={'block pb-2 text-neutral-900'}>{'TVL'}</b>
-					<b
-						className={'block text-3xl text-neutral-900'}
-						suppressHydrationWarning>
-						{formatWithUnit(
-							(props?.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized || 0) *
-								(props.vault.prices?.vaultToken?.normalized || 0)
-						)}
-					</b>
-				</div>
-				{hasVaultTokens ? (
-					<div
-						className={cl(
-							'col-span-2 flex items-center justify-between rounded-lg',
-							'leading-4 border-2 border-neutral-900 bg-pink p-4'
-						)}>
-						<b className={'block text-neutral-900'}>{'You staked'}</b>
-						<b
-							className={'block text-neutral-900'}
-							suppressHydrationWarning>
-							{`${formatAmount(props.vault.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
-						</b>
-					</div>
-				) : (
-					<div
-						className={cl(
-							'col-span-2 rounded-lg grid gap-5 mb-36',
-							'border-2 border-neutral-900 bg-pink p-4'
-						)}>
-						<IconBigChevron className={'text-blue'} />
-						<p
-							className={'block text-xl text-neutral-900'}
-							suppressHydrationWarning>
-							{'Deposit on the left and *poof* you can juice your tokens with extra APR or extra AJNA.'}
-						</p>
-					</div>
-				)}
-			</div>
-
-			<div className={'grid md:hidden'}>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4'}>
-					<div className={'flex items-center justify-between'}>
-						<p className={'block text-sm text-neutral-900'}>{'APR'}</p>
-						<b
-							className={'block text-neutral-900'}
-							suppressHydrationWarning>
-							{getVaultAPR(props?.vault?.yDaemonData)}
-						</b>
-					</div>
-					<div className={'flex items-center justify-between'}>
-						<p className={'block text-sm text-neutral-900'}>{'TVL'}</p>
-						<b
-							className={'block text-neutral-900'}
-							suppressHydrationWarning>
-							{formatWithUnit(
-								(props?.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized || 0) *
-									(props.vault.prices?.vaultToken?.normalized || 0)
-							)}
-						</b>
-					</div>
-
-					<div className={'mt-2 flex items-center justify-between border-t border-neutral-0/40 pt-2'}>
-						<p className={'block text-sm text-neutral-900'}>{'Deposited'}</p>
-						<b
-							className={'block text-neutral-900'}
-							suppressHydrationWarning>
-							{`${formatAmount(props.vault.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0)} ${props.vault.tokenSymbol}`}
-						</b>
-					</div>
-				</div>
-			</div>
+			<DesktopStats {...props} />
+			<MobileStats {...props} />
 
 			{hasVaultTokens ? (
 				<>
