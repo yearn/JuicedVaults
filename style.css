@@ -6,4 +6,7 @@
 }
 
 :root {
+	.toast {
+		@apply border-neutral-900 border-2 rounded-xl bg-[#F1EBD9] flex items-start justify-between p-2;
+	}
 }

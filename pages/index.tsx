@@ -243,9 +243,9 @@ function Home(): ReactElement {
 					priority
 					loading={'eager'}
 					quality={95}
-					width={1920}
-					height={471}
-					src={'/hero.jpg'}
+					width={1136}
+					height={320}
+					src={'/hero.svg'}
 					alt={'Hero'}
 					className={
 						'absolute inset-0 max-h-96 min-h-96 w-full object-cover object-center md:max-h-[471px] md:min-h-[471px]'
@@ -255,6 +255,7 @@ function Home(): ReactElement {
 					<HeaderTitle className={'relative z-20 w-full md:w-[628px]'} />
 				</div>
 			</div>
+			<div className={'h-0.5 w-full bg-neutral-900'} />
 			<section className={'mx-auto grid w-full max-w-6xl'}>
 				<ConnectBox />
 				{VAULT_LIST.map(vault => (

@@ -1,4 +1,5 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
+import {toast} from 'react-hot-toast';
 import {erc20ABI, useContractRead} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {
@@ -6,6 +7,7 @@ import {
 	assertAddress,
 	cl,
 	formatAmount,
+	formatWithUnit,
 	isZeroAddress,
 	MAX_UINT_256,
 	toAddress,
@@ -69,6 +71,9 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 		if (result.isSuccessful) {
 			onRefreshAllowance();
 			props.onRefreshVaultData();
+			toast.success(
+				`Your ${props.vault.tokenSymbol}s have been approved! You can now deposit them to earn on them!`
+			);
 		}
 	}, [approveStatus.pending, provider, props, onRefreshAllowance]);
 
@@ -84,8 +89,11 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 			onRefreshAllowance();
 			props.onRefreshVaultData();
 			set_amount(undefined);
+			toast.success(
+				`You successfully deposited ${amount?.normalized} ${props.vault.tokenSymbol}! You can now stake them to earn some juicy extra rewards!`
+			);
 		}
-	}, [provider, amount?.raw, props, onRefreshAllowance]);
+	}, [provider, props, amount?.raw, amount?.normalized, onRefreshAllowance]);
 
 	function renderApproveButton(): ReactElement {
 		return (
@@ -169,7 +177,7 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 				}
 				onClick={() => set_amount(props.vault?.onChainData?.tokenBalanceOf || toNormalizedBN(0))}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`You have ${formatAmount(props.vault?.onChainData?.tokenBalanceOf?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
+				{`${formatAmount(props.vault?.onChainData?.tokenBalanceOf?.normalized || 0, 4)} available to deposit`}
 			</button>
 		</div>
 	);
@@ -198,8 +206,9 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 		if (result.isSuccessful) {
 			props.onRefreshVaultData();
 			set_amount(undefined);
+			toast.success(`You successfully withdrew ${amount?.normalized} yv${props.vault.tokenSymbol}s!`);
 		}
-	}, [provider, amount?.raw, props]);
+	}, [provider, props, amount?.raw, amount?.normalized]);
 
 	return (
 		<div className={'pt-6'}>
@@ -248,7 +257,7 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 				}
 				onClick={() => set_amount(props.vault?.onChainData?.vaultBalanceOf || toNormalizedBN(0))}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`You have ${formatAmount(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0, 4)} yv${props.vault.tokenSymbol}`}
+				{`${formatAmount(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0, 4)} available to withdraw`}
 			</button>
 		</div>
 	);
@@ -256,6 +265,18 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 
 export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
 	const blockExplorer = getNetwork(props.vault.chainID).blockExplorers?.etherscan?.url;
+
+	const depositedAndStaked = useMemo((): number => {
+		return (
+			(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0) +
+			(props.vault?.onChainData?.stakingBalanceOf?.normalized || 0) +
+			(props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0)
+		);
+	}, [
+		props.vault?.onChainData?.vaultBalanceOf?.normalized,
+		props.vault?.onChainData?.stakingBalanceOf?.normalized,
+		props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized
+	]);
 
 	return (
 		<div className={'relative flex flex-col p-4 md:p-8'}>
@@ -286,7 +307,7 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 					<b
 						className={'block text-3xl text-[#EAE3CE]'}
 						suppressHydrationWarning>
-						{formatAmount(
+						{formatWithUnit(
 							(props?.vault?.onChainData?.totalVaultSupply?.normalized || 0) *
 								(props.vault.prices?.underlyingToken?.normalized || 0)
 						)}
@@ -301,7 +322,7 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 					<b
 						className={'block text-[#EAE3CE]'}
 						suppressHydrationWarning>
-						{`${formatAmount(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
+						{`${formatAmount(depositedAndStaked, 4)} ${props.vault.tokenSymbol}`}
 					</b>
 				</div>
 			</div>
@@ -321,7 +342,7 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 						<b
 							className={'block text-[#EAE3CE]'}
 							suppressHydrationWarning>
-							{formatAmount(
+							{formatWithUnit(
 								(props?.vault?.onChainData?.totalVaultSupply?.normalized || 0) *
 									(props.vault.prices?.underlyingToken?.normalized || 0)
 							)}

@@ -1,4 +1,5 @@
 import React, {useCallback, useState} from 'react';
+import toast from 'react-hot-toast';
 import {erc20ABI, useContractRead} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {
@@ -72,6 +73,9 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 		if (result.isSuccessful) {
 			onRefreshAllowance();
 			props.onRefreshVaultData();
+			toast.success(
+				`Your ${props.vault.tokenSymbol}s have been approved! You can now stake them to earn AJNA tokens!`
+			);
 		}
 	}, [approveStatus.pending, provider, props, onRefreshAllowance]);
 
@@ -87,8 +91,11 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 			onRefreshAllowance();
 			props.onRefreshVaultData();
 			set_amount(undefined);
+			toast.success(
+				`You successfully deposited ${amount?.normalized} ${props.vault.tokenSymbol}! Enjoy your rewards!`
+			);
 		}
-	}, [provider, amount?.raw, props, onRefreshAllowance]);
+	}, [provider, props, amount?.raw, amount?.normalized, onRefreshAllowance]);
 
 	function renderApproveButton(): ReactElement {
 		return (
@@ -172,7 +179,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				}
 				onClick={() => set_amount(props.vault?.onChainData?.vaultBalanceOf || toNormalizedBN(0))}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`You have ${formatAmount(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0, 4)} yv${props.vault.tokenSymbol}`}
+				{`${formatAmount(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0, 4)} available to stake`}
 			</button>
 		</div>
 	);
@@ -201,8 +208,9 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 		if (result.isSuccessful) {
 			props.onRefreshVaultData();
 			set_amount(undefined);
+			toast.success(`You successfully unstaked ${amount?.normalized} yv${props.vault.tokenSymbol}.`);
 		}
-	}, [provider, amount?.raw, props]);
+	}, [provider, props, amount?.raw, amount?.normalized]);
 
 	return (
 		<div className={'pt-6'}>
@@ -251,7 +259,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 				}
 				onClick={() => set_amount(props.vault?.onChainData?.stakingBalanceOf || toNormalizedBN(0))}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`You have ${formatAmount(props.vault?.onChainData?.stakingBalanceOf?.normalized || 0, 4)} yv${props.vault.tokenSymbol} staked`}
+				{`${formatAmount(props.vault?.onChainData?.stakingBalanceOf?.normalized || 0, 4)} available to unstake`}
 			</button>
 		</div>
 	);
@@ -271,6 +279,9 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 		});
 		if (result.isSuccessful) {
 			props.onRefreshVaultData();
+			toast.success(
+				`You successfully claimed ${formatAmount(props?.vault?.onChainData?.rewardEarned?.normalized || 0, 4)} AJNA tokens!`
+			);
 		}
 	}, [provider, props]);
 
@@ -283,6 +294,9 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 		});
 		if (result.isSuccessful) {
 			props.onRefreshVaultData();
+			toast.success(
+				`You successfully exited the vault and claimed ${formatAmount(props?.vault?.onChainData?.rewardEarned?.normalized || 0, 4)} AJNA tokens!`
+			);
 		}
 	}, [provider, props]);
 
@@ -293,8 +307,8 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				<div
 					className={cl(
 						'h-10 w-full overflow-x-scroll rounded-lg px-2 outline-none scrollbar-none',
-						'leading-10',
-						'border-2 border-neutral-900 bg-neutral-0 font-number font-normal'
+						'leading-10 overflow-hidden',
+						'border-2 border-neutral-900 bg-neutral-0 font-number font-normal tabular-nums'
 					)}>
 					{props?.vault?.onChainData?.rewardEarned?.raw === 0n ? (
 						<p className={'font-number font-normal text-neutral-400'}>{formatAmount(0)}</p>
@@ -363,7 +377,7 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 			<p
 				suppressHydrationWarning
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`You earned ${formatAmount(props.vault?.onChainData?.rewardEarned?.normalized || 0, 4)} AJNA`}
+				{`${formatAmount(props.vault?.onChainData?.rewardEarned?.normalized || 0, 4)} AJNA earned`}
 			</p>
 		</div>
 	);
@@ -397,7 +411,7 @@ export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: 
 					<b
 						className={'block text-3xl text-neutral-900'}
 						suppressHydrationWarning>
-						{formatAmount(
+						{formatWithUnit(
 							(props?.vault?.onChainData?.totalStakingSupply?.normalized || 0) *
 								(props.vault.prices?.vaultToken?.normalized || 0)
 						)}
@@ -413,7 +427,7 @@ export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: 
 						<b
 							className={'block text-neutral-900'}
 							suppressHydrationWarning>
-							{`${formatAmount(props.vault.onChainData?.stakingBalanceOf?.normalized || 0, 4)} yv${props.vault.tokenSymbol}`}
+							{`${formatAmount(props.vault.onChainData?.stakingBalanceOf?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
 						</b>
 					</div>
 				) : (
@@ -447,7 +461,7 @@ export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: 
 						<b
 							className={'block text-neutral-900'}
 							suppressHydrationWarning>
-							{formatAmount(
+							{formatWithUnit(
 								(props?.vault?.onChainData?.totalStakingSupply?.normalized || 0) *
 									(props.vault.prices?.vaultToken?.normalized || 0)
 							)}
@@ -459,7 +473,7 @@ export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: 
 						<b
 							className={'block text-neutral-900'}
 							suppressHydrationWarning>
-							{`${formatAmount(props.vault.onChainData?.stakingBalanceOf?.normalized || 0)} yv${props.vault.tokenSymbol}`}
+							{`${formatAmount(props.vault.onChainData?.stakingBalanceOf?.normalized || 0)} ${props.vault.tokenSymbol}`}
 						</b>
 					</div>
 				</div>

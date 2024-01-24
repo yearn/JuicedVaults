@@ -1,9 +1,12 @@
 import React, {Fragment} from 'react';
+import {Toaster} from 'react-hot-toast';
 import localFont from 'next/font/local';
 import Head from 'next/head';
 import {mainnet, polygon} from 'viem/chains';
 import {WalletContextApp} from '@builtbymom/web3/contexts/useWallet';
 import {WithMom} from '@builtbymom/web3/contexts/WithMom';
+import IconCheck from '@icons/IconCheck';
+import IconCircleCross from '@icons/IconCircleCross';
 import {localhost} from '@yearn-finance/web-lib/utils/wagmi/networks';
 import Meta from '@common/Meta';
 
@@ -58,6 +61,27 @@ function MyApp({Component, ...props}: AppProps): ReactElement {
 					</Fragment>
 				</WalletContextApp>
 			</WithMom>
+			<Toaster
+				toastOptions={{
+					duration: 5000,
+					className: 'toast',
+					success: {
+						icon: <IconCheck className={'-mr-1 size-5 min-h-5 min-w-5 pt-1.5'} />,
+						iconTheme: {
+							primary: 'black',
+							secondary: '#F1EBD9'
+						}
+					},
+					error: {
+						icon: <IconCircleCross className={'-mr-1 size-5 min-h-5 min-w-5 pt-1.5'} />,
+						iconTheme: {
+							primary: 'black',
+							secondary: '#F1EBD9'
+						}
+					}
+				}}
+				position={'top-left'}
+			/>
 		</>
 	);
 }

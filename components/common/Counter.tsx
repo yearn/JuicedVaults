@@ -16,7 +16,7 @@ export function Counter({value, decimals = 18}: {value: number; decimals: number
 				duration: 1,
 				onUpdate(value) {
 					valueRef.current = value;
-					node.textContent = formatAmount(value.toFixed(decimals), decimals, decimals);
+					node.textContent = formatAmount(value.toFixed(decimals), 6, decimals);
 				}
 			});
 			return () => controls.stop();

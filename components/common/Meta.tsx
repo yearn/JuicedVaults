@@ -126,6 +126,12 @@ function Meta(): ReactElement {
 				sizes={'167x167'}
 				href={'/favicons/apple-icon-167x167.png'}
 			/>
+			<link
+				rel={'icon'}
+				type={'image/png'}
+				sizes={'512x512'}
+				href={'/favicons/favicon-512x512.png'}
+			/>
 			<meta
 				name={'googlebot'}
 				content={'index,nofollow'}

@@ -1,4 +1,5 @@
 import React, {useCallback, useState} from 'react';
+import toast from 'react-hot-toast';
 import {erc20ABI, useContractRead} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {
@@ -6,6 +7,7 @@ import {
 	assertAddress,
 	cl,
 	formatAmount,
+	formatWithUnit,
 	isZeroAddress,
 	MAX_UINT_256,
 	toAddress,
@@ -69,6 +71,9 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 		if (result.isSuccessful) {
 			onRefreshAllowance();
 			props.onRefreshVaultData();
+			toast.success(
+				`Your ${props.vault.tokenSymbol}s have been approved! You can now stake them to earn some extra APR!`
+			);
 		}
 	}, [approveStatus.pending, provider, props, onRefreshAllowance]);
 
@@ -84,8 +89,11 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 			onRefreshAllowance();
 			props.onRefreshVaultData();
 			set_amount(undefined);
+			toast.success(
+				`You successfully deposited ${amount?.normalized} ${props.vault.tokenSymbol}! Enjoy your juicy exta APR!`
+			);
 		}
-	}, [provider, amount?.raw, props, onRefreshAllowance]);
+	}, [provider, props, amount?.raw, amount?.normalized, onRefreshAllowance]);
 
 	function renderApproveButton(): ReactElement {
 		return (
@@ -169,7 +177,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				}
 				onClick={() => set_amount(props.vault?.onChainData?.vaultBalanceOf || toNormalizedBN(0))}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`You have ${formatAmount(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0, 4)} yv${props.vault.tokenSymbol}`}
+				{`${formatAmount(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0, 4)} available to stake`}
 			</button>
 		</div>
 	);
@@ -198,8 +206,9 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 		if (result.isSuccessful) {
 			props.onRefreshVaultData();
 			set_amount(undefined);
+			toast.success(`You successfully unstaked ${amount?.normalized} yv${props.vault.tokenSymbol}.`);
 		}
-	}, [provider, amount?.raw, props]);
+	}, [provider, props, amount?.raw, amount?.normalized]);
 
 	return (
 		<div className={'pb-2 pt-6 md:pb-[92px]'}>
@@ -250,7 +259,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 				}
 				onClick={() => set_amount(props.vault?.onChainData?.autoCoumpoundingVaultBalance || toNormalizedBN(0))}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`You have ${formatAmount(props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0, 4)} yv${props.vault.tokenSymbol} staked`}
+				{`${formatAmount(props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0, 4)} available to unstake`}
 			</button>
 		</div>
 	);
@@ -284,7 +293,7 @@ export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultD
 					<b
 						className={'block text-3xl text-neutral-900'}
 						suppressHydrationWarning>
-						{formatAmount(
+						{formatWithUnit(
 							(props?.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized || 0) *
 								(props.vault.prices?.vaultToken?.normalized || 0)
 						)}
@@ -300,7 +309,7 @@ export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultD
 						<b
 							className={'block text-neutral-900'}
 							suppressHydrationWarning>
-							{`${formatAmount(props.vault.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0, 4)} yv${props.vault.tokenSymbol}`}
+							{`${formatAmount(props.vault.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
 						</b>
 					</div>
 				) : (
@@ -334,7 +343,7 @@ export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultD
 						<b
 							className={'block text-neutral-900'}
 							suppressHydrationWarning>
-							{formatAmount(
+							{formatWithUnit(
 								(props?.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized || 0) *
 									(props.vault.prices?.vaultToken?.normalized || 0)
 							)}
@@ -346,7 +355,7 @@ export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultD
 						<b
 							className={'block text-neutral-900'}
 							suppressHydrationWarning>
-							{`${formatAmount(props.vault.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0)} yv${props.vault.tokenSymbol}`}
+							{`${formatAmount(props.vault.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0)} ${props.vault.tokenSymbol}`}
 						</b>
 					</div>
 				</div>
