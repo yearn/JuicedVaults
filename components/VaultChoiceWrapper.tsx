@@ -17,7 +17,7 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 			<div
 				className={cl(
 					'relative border-2 rounded-2xl border-neutral-900 overflow-hidden',
-					selectedTab === 0 ? 'bg-[#6382FF]' : 'bg-[#FF7D01]'
+					selectedTab === 0 ? 'bg-blue' : 'bg-orange'
 				)}>
 				<div className={'grid grid-cols-2'}>
 					<button
@@ -25,12 +25,12 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 						className={cl(
 							'flex space-x-2 items-center',
 							'w-full rounded-2xl rounded-tl-none rounded-bl-none rounded-tr-none border-b-2 border-r-2 p-2 md:px-8 py-4 text-left',
-							selectedTab === 0 ? 'border-transparent' : 'bg-[#6382FF] border-neutral-900'
+							selectedTab === 0 ? 'border-transparent' : 'bg-blue border-neutral-900'
 						)}>
 						<div
 							className={cl(
 								'hidden md:flex size-12 items-center justify-center rounded-full',
-								'bg-[#EE99FF] border-2 border-neutral-900'
+								'bg-pink border-2 border-neutral-900'
 							)}>
 							<IconRecycle className={'size-8'} />
 						</div>
@@ -41,11 +41,11 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 						className={cl(
 							'flex space-x-2 items-center',
 							'w-full rounded-2xl rounded-br-none rounded-tl-none rounded-tr-none border-b-2 border-l-2 p-2 md:px-8 py-4 text-left',
-							selectedTab === 1 ? 'border-transparent' : 'bg-[#FF7D01] border-neutral-900'
+							selectedTab === 1 ? 'border-transparent' : 'bg-orange border-neutral-900'
 						)}>
 						<div
 							className={
-								'hidden size-12 items-center justify-center rounded-full border-2 border-neutral-900 bg-[#FEBC02] md:flex'
+								'hidden size-12 items-center justify-center rounded-full border-2 border-neutral-900 bg-yellow md:flex'
 							}>
 							<IconGold className={'size-8'} />
 						</div>

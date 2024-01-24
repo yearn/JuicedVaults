@@ -36,7 +36,7 @@ function ConnectBox(): ReactElement {
 
 	return (
 		<div className={'z-10 -mt-28 mb-10 w-full md:mb-16 md:w-1/2 md:pr-4'}>
-			<div className={'rounded-2xl border-2 border-neutral-900 bg-[#EAE3CE] p-6'}>
+			<div className={'rounded-2xl border-2 border-neutral-900 bg-beige p-6'}>
 				<b className={'mb-2 block text-xl text-neutral-900'}>{'Freshly squeezed and bursting with yield.'}</b>
 				<p className={'mb-4 block whitespace-break-spaces text-base md:text-xl'}>
 					{'Let Yearn auto compound your rewards or claim them for yourself. '}
@@ -44,7 +44,7 @@ function ConnectBox(): ReactElement {
 				<button
 					suppressHydrationWarning
 					onClick={address ? openAccountModal : onConnect}
-					className={'h-10 rounded-lg border-2 border-neutral-900 bg-[#EBAB0F] px-5 text-base font-bold'}>
+					className={'h-10 rounded-lg border-2 border-neutral-900 bg-yellow px-5 text-base font-bold'}>
 					{address && ens ? ens : address ? truncateHex(address, 6) : 'Connect Wallet'}
 				</button>
 			</div>
@@ -204,7 +204,7 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 			<div className={'flex w-full rounded-2xl bg-neutral-800 pb-3 pr-1'}>
 				<div
 					className={cl(
-						'-mt-2 -ml-2 rounded-2xl border-2 border-neutral-900 bg-[#EAE3CE]',
+						'-mt-2 -ml-2 rounded-2xl border-2 border-neutral-900 bg-beige',
 						'grid grid-cols-1 gap-x-0 md:grid-cols-2 md:gap-x-6 w-full h-full'
 					)}>
 					<VaultBasicDeposit

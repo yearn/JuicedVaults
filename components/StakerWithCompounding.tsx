@@ -107,7 +107,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				className={cl(
 					'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 					'focus:ring-transparent focus:!border-neutral-600',
-					'disabled:bg-neutral-300 bg-[#EE99FF] hover:bg-[#F2B4FF] transition-colors',
+					'disabled:bg-neutral-300 bg-pink hover:bg-pinkHover transition-colors',
 					'border-neutral-600',
 					'disabled:cursor-not-allowed',
 					'disabled:text-neutral-400 text-neutral-900'
@@ -136,7 +136,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				className={cl(
 					'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 					'focus:ring-transparent focus:!border-neutral-600',
-					'disabled:bg-neutral-300 bg-[#EE99FF] hover:bg-[#F2B4FF] transition-colors',
+					'disabled:bg-neutral-300 bg-pink hover:bg-pinkHover transition-colors',
 					'border-neutral-600',
 					'disabled:cursor-not-allowed',
 					'disabled:text-neutral-400 text-neutral-900'
@@ -236,7 +236,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 					className={cl(
 						'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 						'focus:ring-transparent focus:!border-neutral-600',
-						'disabled:bg-neutral-300 bg-[#EE99FF] hover:bg-[#F2B4FF] transition-colors',
+						'disabled:bg-neutral-300 bg-pink hover:bg-pinkHover transition-colors',
 						'border-neutral-600',
 						'disabled:cursor-not-allowed',
 						'disabled:text-neutral-400 text-neutral-900'
@@ -274,7 +274,7 @@ export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultD
 	return (
 		<div className={'p-2 pt-[30px] md:p-8'}>
 			<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-[#EE99FF] p-4 leading-4'}>
+				<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4 leading-4'}>
 					<b
 						suppressHydrationWarning
 						className={'block pb-2 text-neutral-900'}>
@@ -288,7 +288,7 @@ export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultD
 						{getVaultAPR(props?.vault?.yDaemonAutoCompoundingData)}
 					</b>
 				</div>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-[#EE99FF] p-4 leading-4'}>
+				<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4 leading-4'}>
 					<b className={'block pb-2 text-neutral-900'}>{'TVL'}</b>
 					<b
 						className={'block text-3xl text-neutral-900'}
@@ -303,7 +303,7 @@ export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultD
 					<div
 						className={cl(
 							'col-span-2 flex items-center justify-between rounded-lg',
-							'leading-4 border-2 border-neutral-900 bg-[#EE99FF] p-4'
+							'leading-4 border-2 border-neutral-900 bg-pink p-4'
 						)}>
 						<b className={'block text-neutral-900'}>{'You staked'}</b>
 						<b
@@ -316,9 +316,9 @@ export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultD
 					<div
 						className={cl(
 							'col-span-2 rounded-lg grid gap-5 mb-36',
-							'border-2 border-neutral-900 bg-[#EE99FF] p-4'
+							'border-2 border-neutral-900 bg-pink p-4'
 						)}>
-						<IconBigChevron className={'text-[#6382FF]'} />
+						<IconBigChevron className={'text-blue'} />
 						<p
 							className={'block text-xl text-neutral-900'}
 							suppressHydrationWarning>
@@ -329,7 +329,7 @@ export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultD
 			</div>
 
 			<div className={'grid md:hidden'}>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-[#EE99FF] p-4'}>
+				<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4'}>
 					<div className={'flex items-center justify-between'}>
 						<p className={'block text-sm text-neutral-900'}>{'APR'}</p>
 						<b

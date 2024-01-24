@@ -7,7 +7,7 @@ export const VAULT_LIST: TVaultListItem[] = [
 		name: 'yvAjnaDAI',
 		tokenSymbol: 'DAI',
 		decimals: 18,
-		chainID: 1337,
+		chainID: 1,
 		vaultAddress: toAddress('0xe24BA27551aBE96Ca401D39761cA2319Ea14e3CB'), //yvDAI
 		tokenAddress: toAddress('0x6B175474E89094C44Da98b954EedeAC495271d0F'), //DAI
 		autoCompoundingAddress: toAddress('0x082a5743aAdf3d0Daf750EeF24652b36a68B1e9C'), //yvyvDAI

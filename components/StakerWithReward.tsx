@@ -109,7 +109,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				className={cl(
 					'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 					'focus:ring-transparent focus:!border-neutral-600',
-					'disabled:bg-neutral-300 bg-[#FEBC02]',
+					'disabled:bg-neutral-300 bg-yellow',
 					'border-neutral-600',
 					'disabled:cursor-not-allowed',
 					'disabled:text-neutral-400 text-neutral-900'
@@ -138,7 +138,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				className={cl(
 					'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 					'focus:ring-transparent focus:!border-neutral-600',
-					'disabled:bg-neutral-300 bg-[#FEBC02]',
+					'disabled:bg-neutral-300 bg-yellow',
 					'border-neutral-600',
 					'disabled:cursor-not-allowed',
 					'disabled:text-neutral-400 text-neutral-900'
@@ -237,7 +237,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 					className={cl(
 						'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 						'focus:ring-transparent focus:!border-neutral-600',
-						'disabled:bg-neutral-300 bg-[#FEBC02]',
+						'disabled:bg-neutral-300 bg-yellow',
 						'border-neutral-600',
 						'disabled:cursor-not-allowed',
 						'disabled:text-neutral-400 text-neutral-900'
@@ -332,7 +332,7 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 						className={cl(
 							'h-10 min-w-[128px] rounded-lg border-2 text-base font-bold relative',
 							'focus:ring-transparent focus:!border-neutral-600',
-							'disabled:bg-neutral-300 bg-[#FEBC02]',
+							'disabled:bg-neutral-300 bg-yellow',
 							'border-neutral-600',
 							'disabled:cursor-not-allowed',
 							'disabled:text-neutral-400 text-neutral-900'
@@ -358,7 +358,7 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 						className={cl(
 							'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 							'focus:ring-transparent focus:!border-neutral-600',
-							'disabled:bg-neutral-300 bg-[#FEBC02]',
+							'disabled:bg-neutral-300 bg-yellow',
 							'border-neutral-600',
 							'disabled:cursor-not-allowed',
 							'disabled:text-neutral-400 text-neutral-900'
@@ -392,7 +392,7 @@ export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: 
 	return (
 		<div className={'p-2 pt-[30px] md:p-8'}>
 			<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-[#FEBC02] p-4 leading-4'}>
+				<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4 leading-4'}>
 					<b
 						suppressHydrationWarning
 						className={'block pb-2 text-neutral-900'}>
@@ -406,7 +406,7 @@ export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: 
 						{`${formatWithUnit(Number(props.vault.onChainData?.stakingAPR || 0), 0)}/week`}
 					</b>
 				</div>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-[#FEBC02] p-4 leading-4'}>
+				<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4 leading-4'}>
 					<b className={'block pb-2 text-neutral-900'}>{'TVL'}</b>
 					<b
 						className={'block text-3xl text-neutral-900'}
@@ -421,7 +421,7 @@ export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: 
 					<div
 						className={cl(
 							'col-span-2 flex items-center justify-between rounded-lg border-2',
-							'leading-4 border-neutral-900 bg-[#FEBC02] p-4'
+							'leading-4 border-neutral-900 bg-yellow p-4'
 						)}>
 						<b className={'block text-neutral-900'}>{'You staked'}</b>
 						<b
@@ -434,9 +434,9 @@ export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: 
 					<div
 						className={cl(
 							'col-span-2 rounded-lg grid gap-5 mb-36',
-							'border-2 border-neutral-900 bg-[#FEBC02] p-4'
+							'border-2 border-neutral-900 bg-yellow p-4'
 						)}>
-						<IconBigChevron className={'text-[#FF7D01]'} />
+						<IconBigChevron className={'text-orange'} />
 						<p
 							className={'block text-xl text-neutral-900'}
 							suppressHydrationWarning>
@@ -447,7 +447,7 @@ export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: 
 			</div>
 
 			<div className={'grid md:hidden'}>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-[#FEBC02] p-4'}>
+				<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4'}>
 					<div className={'flex items-center justify-between'}>
 						<p className={'block text-sm text-neutral-900'}>{'APR'}</p>
 						<b

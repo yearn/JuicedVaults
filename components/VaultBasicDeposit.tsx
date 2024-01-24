@@ -107,7 +107,7 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 				className={cl(
 					'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 					'focus:ring-transparent focus:border-neutral-600',
-					'disabled:bg-neutral-300 bg-[#424242] hover:bg-[#424242]/95 transition-colors',
+					'disabled:bg-neutral-300 bg-carbon hover:bg-carbon/95 transition-colors',
 					'border-neutral-600',
 					'disabled:cursor-not-allowed border-neutral-600',
 					'disabled:text-neutral-400 text-neutral-0'
@@ -136,7 +136,7 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 				className={cl(
 					'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 					'focus:ring-transparent focus:!border-neutral-600',
-					'disabled:bg-neutral-300 bg-[#424242]',
+					'disabled:bg-neutral-300 bg-carbon',
 					'border-neutral-600',
 					'disabled:cursor-not-allowed',
 					'disabled:text-neutral-400 text-neutral-0'
@@ -235,7 +235,7 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 					className={cl(
 						'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 						'focus:ring-transparent focus:!border-neutral-600',
-						'disabled:bg-neutral-300 bg-[#424242] hover:bg-[#424242]/95 transition-colors',
+						'disabled:bg-neutral-300 bg-carbon hover:bg-carbon/95 transition-colors',
 						'border-neutral-600',
 						'disabled:cursor-not-allowed',
 						'disabled:text-neutral-400 text-neutral-0'
@@ -288,24 +288,28 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 					src={`${process.env.SMOL_ASSETS_URL}/token/${props.vault.chainID}/${props.vault.tokenAddress}/logo-128.png`}
 					className={'size-8'}
 				/>
-				<b className={'block text-xl text-neutral-900'}>
-					{`Deposit ${props.vault.tokenSymbol} and let’s juice`}
+				<b className={'block whitespace-break-spaces text-xl text-neutral-900'}>
+					{`Deposit ${props.vault.tokenSymbol} and then stake for\n`}
+					<span className={'text-blue'}>{'more APR'}</span>
+					{' or '}
+					<span className={'text-orange'}>{'more AJNA'}</span>
+					{'.'}
 				</b>
 			</div>
 
 			<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-[#424242] p-4 leading-4'}>
-					<b className={'block pb-2 text-[#EAE3CE]'}>{'APR'}</b>
+				<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4 leading-4'}>
+					<b className={'block pb-2 text-beige'}>{'APR'}</b>
 					<b
 						suppressHydrationWarning
-						className={'block text-3xl text-[#EAE3CE]'}>
+						className={'block text-3xl text-beige'}>
 						{getVaultAPR(props?.vault?.yDaemonData)}
 					</b>
 				</div>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-[#424242] p-4 leading-4'}>
-					<b className={'block pb-2 text-[#EAE3CE]'}>{'TVL'}</b>
+				<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4 leading-4'}>
+					<b className={'block pb-2 text-beige'}>{'TVL'}</b>
 					<b
-						className={'block text-3xl text-[#EAE3CE]'}
+						className={'block text-3xl text-beige'}
 						suppressHydrationWarning>
 						{formatWithUnit(
 							(props?.vault?.onChainData?.totalVaultSupply?.normalized || 0) *
@@ -316,11 +320,11 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 				<div
 					className={cl(
 						'col-span-2 flex items-center justify-between rounded-lg border-2',
-						'leading-4 border-neutral-900 bg-[#424242] p-4'
+						'leading-4 border-neutral-900 bg-carbon p-4'
 					)}>
-					<b className={'block text-[#EAE3CE]'}>{'You deposited'}</b>
+					<b className={'block text-beige'}>{'You deposited'}</b>
 					<b
-						className={'block text-[#EAE3CE]'}
+						className={'block text-beige'}
 						suppressHydrationWarning>
 						{`${formatAmount(depositedAndStaked, 4)} ${props.vault.tokenSymbol}`}
 					</b>
@@ -328,19 +332,19 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 			</div>
 
 			<div className={'grid md:hidden'}>
-				<div className={'rounded-lg border-2 border-neutral-900 bg-[#424242] p-4'}>
+				<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4'}>
 					<div className={'flex items-center justify-between'}>
-						<p className={'block text-sm text-[#EAE3CE]'}>{'APR'}</p>
+						<p className={'block text-sm text-beige'}>{'APR'}</p>
 						<b
-							className={'block text-[#EAE3CE]'}
+							className={'block text-beige'}
 							suppressHydrationWarning>
 							{getVaultAPR(props?.vault?.yDaemonData)}
 						</b>
 					</div>
 					<div className={'flex items-center justify-between'}>
-						<p className={'block text-sm text-[#EAE3CE]'}>{'TVL'}</p>
+						<p className={'block text-sm text-beige'}>{'TVL'}</p>
 						<b
-							className={'block text-[#EAE3CE]'}
+							className={'block text-beige'}
 							suppressHydrationWarning>
 							{formatWithUnit(
 								(props?.vault?.onChainData?.totalVaultSupply?.normalized || 0) *
@@ -350,9 +354,9 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 					</div>
 
 					<div className={'mt-2 flex items-center justify-between border-t border-neutral-0/40 pt-2'}>
-						<p className={'block text-sm text-[#EAE3CE]'}>{'Deposited'}</p>
+						<p className={'block text-sm text-beige'}>{'Deposited'}</p>
 						<b
-							className={'block text-[#EAE3CE]'}
+							className={'block text-beige'}
 							suppressHydrationWarning>
 							{`${formatAmount(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0)} ${props.vault.tokenSymbol}`}
 						</b>
