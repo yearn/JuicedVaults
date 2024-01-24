@@ -294,7 +294,10 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 					suppressHydrationWarning>
 					{formatWithUnit(
 						(props?.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized || 0) *
-							(props.vault.prices?.vaultToken?.normalized || 0)
+							(props.vault.prices?.vaultToken?.normalized || 0),
+						2,
+						2,
+						{locales: ['en-US']}
 					)}
 				</b>
 			</div>
@@ -349,7 +352,10 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 						suppressHydrationWarning>
 						{formatWithUnit(
 							(props?.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized || 0) *
-								(props.vault.prices?.vaultToken?.normalized || 0)
+								(props.vault.prices?.vaultToken?.normalized || 0),
+							2,
+							2,
+							{locales: ['en-US']}
 						)}
 					</b>
 				</div>
