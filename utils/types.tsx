@@ -4,6 +4,7 @@ import type {TAddress, TNormalizedBN} from '@builtbymom/web3/types';
 export type TVaultListItem = {
 	name: string;
 	tokenSymbol: string;
+	rewardSymbol: string;
 	decimals: number;
 	chainID: number;
 	vaultAddress: TAddress;

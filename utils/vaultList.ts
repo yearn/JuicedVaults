@@ -6,6 +6,7 @@ export const VAULT_LIST: TVaultListItem[] = [
 	{
 		name: 'yvAjnaDAI',
 		tokenSymbol: 'DAI',
+		rewardSymbol: 'AJNA',
 		decimals: 18,
 		chainID: 1,
 		vaultAddress: toAddress('0xe24BA27551aBE96Ca401D39761cA2319Ea14e3CB'), //yvDAI
@@ -17,13 +18,13 @@ export const VAULT_LIST: TVaultListItem[] = [
 	// {
 	// 	name: 'yvAjnaUSDC',
 	// 	tokenSymbol: 'USDC',
+	// 	rewardSymbol: 'MATIC',
 	// 	decimals: 6,
 	// 	chainID: 137,
 	// 	vaultAddress: toAddress('0xF54a15F6da443041Bb075959EA66EE47655DDFcA'), //yvUSDC
 	// 	tokenAddress: toAddress('0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'), //USDC
-	// 	stakingAddress: toAddress('0xF54a15F6da443041Bb075959EA66EE47655DDFcA'), //stakedUSDC
-
-	// 	autoCompoundingAddress: toAddress('0'), //yvyvUSDC
-	// 	rewardAddress: toAddress('0') //Ajna
+	// 	autoCompoundingAddress: toAddress('0x4987d1856F93DFf29e08aa605A805FaF43dC3103'), //yvyvUSDC
+	// 	stakingAddress: toAddress('0x602920E7e0a335137E02DF139CdF8D1381DAdBfD'), //stakedUSDC
+	// 	rewardAddress: toAddress('0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270') //wMATIC
 	// }
 ];

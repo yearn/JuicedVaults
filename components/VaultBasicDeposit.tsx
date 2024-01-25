@@ -14,14 +14,13 @@ import {
 	toBigInt,
 	toNormalizedBN
 } from '@builtbymom/web3/utils';
-import {handleInputChangeValue} from '@builtbymom/web3/utils/handlers';
 import {approveERC20, defaultTxStatus, getNetwork} from '@builtbymom/web3/utils/wagmi';
 import {IconSpinner} from '@icons/IconSpinner';
 import {depositERC20, redeemV3Shares} from '@utils/actions';
-import {getVaultAPR, toSafeChainID} from '@utils/helpers';
+import {getVaultAPR, onInput, toSafeChainID} from '@utils/helpers';
 import {ImageWithFallback} from '@common/ImageWithFallback';
 
-import type {ChangeEvent, ReactElement} from 'react';
+import type {ReactElement} from 'react';
 import type {TNormalizedBN} from '@builtbymom/web3/types';
 import type {TVaultData} from '@utils/types';
 
@@ -30,13 +29,6 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 	const [amount, set_amount] = useState<TNormalizedBN | undefined>(undefined);
 	const [approveStatus, set_approveStatus] = useState(defaultTxStatus);
 	const [depositStatus, set_depositStatus] = useState(defaultTxStatus);
-
-	const onChangeInput = useCallback(
-		(e: ChangeEvent<HTMLInputElement>): void => {
-			set_amount(handleInputChangeValue(e.target.value, props.vault.decimals));
-		},
-		[props.vault.decimals]
-	);
 
 	const {data: hasAllowance, refetch: onRefreshAllowance} = useContractRead({
 		abi: erc20ABI,
@@ -66,7 +58,8 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 			contractAddress: props.vault.tokenAddress,
 			spenderAddress: props.vault.vaultAddress,
 			amount: MAX_UINT_256,
-			statusHandler: set_approveStatus
+			statusHandler: set_approveStatus,
+			shouldDisplaySuccessToast: false
 		});
 		if (result.isSuccessful) {
 			onRefreshAllowance();
@@ -88,7 +81,7 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 			props.onRefreshVaultData();
 			set_amount(undefined);
 			toast.success(
-				`You successfully deposited ${amount?.normalized} ${props.vault.tokenSymbol}. Now stake them for more APR or more AJNA`
+				`You successfully deposited ${amount?.normalized} ${props.vault.tokenSymbol}. Now stake them for more APR or more ${props.vault.rewardSymbol}`
 			);
 		}
 	}, [provider, props, amount?.raw, amount?.normalized, onRefreshAllowance]);
@@ -161,10 +154,13 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 						'border-2 border-neutral-600 bg-transparent'
 					)}
 					placeholder={'0.00'}
-					type={'text'}
+					type={'number'}
+					min={0}
 					autoComplete={'off'}
-					value={amount?.normalized || ''}
-					onChange={onChangeInput}
+					value={amount === undefined ? '' : amount.normalized}
+					onChange={e =>
+						set_amount(onInput(e, props.vault.decimals, props.vault.onChainData?.tokenBalanceOf))
+					}
 				/>
 				{hasAllowance ? renderDepositButton() : renderApproveButton()}
 			</div>
@@ -185,13 +181,6 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 	const {provider} = useWeb3();
 	const [amount, set_amount] = useState<TNormalizedBN | undefined>(undefined);
 	const [withdrawStatus, set_withdrawStatus] = useState(defaultTxStatus);
-
-	const onChangeInput = useCallback(
-		(e: ChangeEvent<HTMLInputElement>): void => {
-			set_amount(handleInputChangeValue(e.target.value, props.vault.decimals));
-		},
-		[props.vault.decimals]
-	);
 
 	const onWithdraw = useCallback(async (): Promise<void> => {
 		const result = await redeemV3Shares({
@@ -218,10 +207,13 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 						'border-2 border-neutral-600 bg-transparent'
 					)}
 					placeholder={'0.00'}
-					type={'text'}
+					type={'number'}
+					min={0}
 					autoComplete={'off'}
-					value={amount?.normalized || ''}
-					onChange={onChangeInput}
+					value={amount === undefined ? '' : amount.normalized}
+					onChange={e =>
+						set_amount(onInput(e, props.vault.decimals, props.vault.onChainData?.vaultBalanceOf))
+					}
 				/>
 				<button
 					onClick={onWithdraw}
@@ -383,7 +375,7 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 					{`Deposit ${props.vault.tokenSymbol} and then stake for `}
 					<span className={'text-blue'}>{'more APR'}</span>
 					{' or '}
-					<span className={'text-orange'}>{'more AJNA'}</span>
+					<span className={'text-orange'}>{`more ${props.vault.rewardSymbol}`}</span>
 					{'.'}
 				</b>
 			</div>

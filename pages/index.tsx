@@ -148,7 +148,7 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 		const rewardRate = toNormalizedBN(toBigInt(onChainData?.[6]?.result?.[3]), 18);
 		const rewardDuration = toBigInt(onChainData?.[6]?.result?.[1]);
 		const rewardContractTotalSupply = toNormalizedBN(decodeAsBigInt(onChainData[3]), props.vault.decimals);
-		const ajnaPerWeek = rewardRate.normalized * Number(rewardDuration);
+		const rewardsPerWeek = rewardRate.normalized * Number(rewardDuration);
 
 		set_onChainVault({
 			totalVaultSupply: toNormalizedBN(decodeAsBigInt(onChainData[0]), props.vault.decimals),
@@ -169,7 +169,7 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 			autoCoumpoundingVaultBalance: isZeroAddress(address)
 				? toNormalizedBN(0)
 				: toNormalizedBN(decodeAsBigInt(onChainData[8]), props.vault.decimals),
-			stakingAPR: ajnaPerWeek
+			stakingAPR: rewardsPerWeek
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [

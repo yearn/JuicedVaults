@@ -14,14 +14,13 @@ import {
 	toBigInt,
 	toNormalizedBN
 } from '@builtbymom/web3/utils';
-import {handleInputChangeValue} from '@builtbymom/web3/utils/handlers';
 import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {IconBigChevron} from '@icons/IconBigChevron';
 import {IconSpinner} from '@icons/IconSpinner';
 import {depositERC20, redeemV3Shares} from '@utils/actions';
-import {getVaultAPR} from '@utils/helpers';
+import {getVaultAPR, onInput} from '@utils/helpers';
 
-import type {ChangeEvent, ReactElement} from 'react';
+import type {ReactElement} from 'react';
 import type {TNormalizedBN} from '@builtbymom/web3/types';
 import type {TVaultData} from '@utils/types';
 
@@ -30,13 +29,6 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 	const [amount, set_amount] = useState<TNormalizedBN | undefined>(undefined);
 	const [approveStatus, set_approveStatus] = useState(defaultTxStatus);
 	const [depositStatus, set_depositStatus] = useState(defaultTxStatus);
-
-	const onChangeInput = useCallback(
-		(e: ChangeEvent<HTMLInputElement>): void => {
-			set_amount(handleInputChangeValue(e.target.value, props.vault.decimals));
-		},
-		[props.vault.decimals]
-	);
 
 	const {data: hasAllowance, refetch: onRefreshAllowance} = useContractRead({
 		abi: erc20ABI,
@@ -66,7 +58,8 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 			contractAddress: props.vault.vaultAddress,
 			spenderAddress: props.vault.autoCompoundingAddress,
 			amount: MAX_UINT_256,
-			statusHandler: set_approveStatus
+			statusHandler: set_approveStatus,
+			shouldDisplaySuccessToast: false
 		});
 		if (result.isSuccessful) {
 			onRefreshAllowance();
@@ -163,10 +156,13 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 						'border-2 border-neutral-900 bg-neutral-0 font-normal font-number'
 					)}
 					placeholder={'0.00'}
-					type={'text'}
+					type={'number'}
+					min={0}
 					autoComplete={'off'}
-					value={amount?.normalized || ''}
-					onChange={onChangeInput}
+					value={amount === undefined ? '' : amount.normalized}
+					onChange={e =>
+						set_amount(onInput(e, props.vault.decimals, props.vault.onChainData?.vaultBalanceOf))
+					}
 				/>
 				{hasAllowance ? renderStakeButton() : renderApproveButton()}
 			</div>
@@ -187,13 +183,6 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 	const {provider} = useWeb3();
 	const [amount, set_amount] = useState<TNormalizedBN | undefined>(undefined);
 	const [withdrawStatus, set_withdrawStatus] = useState(defaultTxStatus);
-
-	const onChangeInput = useCallback(
-		(e: ChangeEvent<HTMLInputElement>): void => {
-			set_amount(handleInputChangeValue(e.target.value, props.vault.decimals));
-		},
-		[props.vault.decimals]
-	);
 
 	const onUnstake = useCallback(async (): Promise<void> => {
 		const result = await redeemV3Shares({
@@ -220,10 +209,15 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 						'border-2 border-neutral-900 bg-neutral-0 font-normal font-number'
 					)}
 					placeholder={'0.00'}
-					type={'text'}
+					type={'number'}
+					min={0}
 					autoComplete={'off'}
-					value={amount?.normalized || ''}
-					onChange={onChangeInput}
+					value={amount === undefined ? '' : amount.normalized}
+					onChange={e =>
+						set_amount(
+							onInput(e, props.vault.decimals, props.vault.onChainData?.autoCoumpoundingVaultBalance)
+						)
+					}
 				/>
 				<button
 					onClick={onUnstake}
@@ -321,7 +315,7 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 					<p
 						className={'block text-xl text-neutral-900'}
 						suppressHydrationWarning>
-						{'Deposit on the left and *poof* you can juice your tokens with extra APR or extra AJNA.'}
+						{`Deposit on the left and *poof* you can juice your tokens with extra APR or extra ${props.vault.rewardSymbol}.`}
 					</p>
 				</div>
 			)}

@@ -1,6 +1,8 @@
-import {formatPercent} from '@builtbymom/web3/utils';
+import {formatPercent, handleInputChangeValue, toBigInt} from '@builtbymom/web3/utils';
 
+import type {ChangeEvent} from 'react';
 import type {TYDaemonVault} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
+import type {TNormalizedBN} from '@builtbymom/web3/types';
 
 export function toSafeChainID(chainID: number): number {
 	if (chainID === 1337) {
@@ -30,4 +32,19 @@ export function getVaultAPR(vault: TYDaemonVault | undefined): string {
 		return 'new';
 	}
 	return formatPercent(0);
+}
+
+export function onInput(
+	e: ChangeEvent<HTMLInputElement>,
+	decimals: number,
+	balance: TNormalizedBN | undefined
+): TNormalizedBN | undefined {
+	if (e.target.value === '') {
+		return undefined;
+	}
+	const expectedNewValue = handleInputChangeValue(e.target.value, decimals);
+	if (expectedNewValue.raw > toBigInt(balance?.raw)) {
+		return balance;
+	}
+	return handleInputChangeValue(e.target.value, decimals);
 }

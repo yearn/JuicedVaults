@@ -49,7 +49,7 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 							}>
 							<IconGold className={'size-8'} />
 						</div>
-						<b className={'text-base text-neutral-900 md:text-xl'}>{'Extra AJNA'}</b>
+						<b className={'text-base text-neutral-900 md:text-xl'}>{`Extra ${props.vault.rewardSymbol}`}</b>
 					</button>
 				</div>
 
