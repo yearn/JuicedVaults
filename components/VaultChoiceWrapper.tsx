@@ -10,7 +10,7 @@ import type {ReactElement} from 'react';
 import type {TVaultData} from '@utils/types';
 
 export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
-	const [selectedTab, set_selectedTab] = useState<number>(1);
+	const [selectedTab, set_selectedTab] = useState<number>(0);
 
 	return (
 		<div className={'p-4 md:p-6'}>

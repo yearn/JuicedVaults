@@ -386,8 +386,12 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 			<WithdrawSection {...props} />
 
 			<div className={'mt-auto hidden md:block'}>
-				<p className={'text-xs'}>
-					{'Contract: '}
+				<b className={'block pb-2 text-xs'}>
+					{'Network: '}
+					{getNetwork(props.vault.chainID).name}
+				</b>
+				<p className={'text-xs text-neutral-600'}>
+					<span className={'text-neutral-600'}>{'Contract: '}</span>
 					<a
 						className={'cursor-alias hover:underline'}
 						href={`${blockExplorer}/address/${props.vault.vaultAddress}`}
