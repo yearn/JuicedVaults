@@ -7,6 +7,7 @@ import {
 	assertAddress,
 	cl,
 	formatAmount,
+	formatPercent,
 	formatWithUnit,
 	isZeroAddress,
 	MAX_UINT_256,
@@ -278,7 +279,7 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 				<b
 					suppressHydrationWarning
 					className={'block text-3xl text-neutral-900'}>
-					{getVaultAPR(props?.vault?.yDaemonAutoCompoundingData)}
+					{formatPercent(props.vault.autoCompoundingAPR, 2)}
 				</b>
 			</div>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4 leading-4'}>
@@ -338,7 +339,7 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 					<b
 						className={'block text-neutral-900'}
 						suppressHydrationWarning>
-						{getVaultAPR(props?.vault?.yDaemonAutoCompoundingData)}
+						{formatPercent(props.vault.autoCompoundingAPR, 2)}
 					</b>
 				</div>
 				<div className={'flex items-center justify-between'}>

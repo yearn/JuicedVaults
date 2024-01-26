@@ -64,10 +64,6 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 		endpoint: `${yDaemonBaseUri}/vaults/${props.vault.vaultAddress}`,
 		schema: yDaemonVaultSchema
 	});
-	const {data: yDaemonAutoCompoundingVault} = useFetch<TYDaemonVault>({
-		endpoint: `${yDaemonBaseUri}/vaults/${props.vault.autoCompoundingAddress}`,
-		schema: yDaemonVaultSchema
-	});
 
 	const {data: onChainData, refetch: onRefreshVaultData} = useContractReads({
 		watch: true,
@@ -147,8 +143,8 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 
 		const rewardRate = toNormalizedBN(toBigInt(onChainData?.[6]?.result?.[3]), 18);
 		const rewardDuration = toBigInt(onChainData?.[6]?.result?.[1]);
-		const rewardContractTotalSupply = toNormalizedBN(decodeAsBigInt(onChainData[3]), props.vault.decimals);
 		const rewardsPerWeek = rewardRate.normalized * Number(rewardDuration);
+		const rewardContractTotalSupply = toNormalizedBN(decodeAsBigInt(onChainData[3]), props.vault.decimals);
 
 		set_onChainVault({
 			totalVaultSupply: toNormalizedBN(decodeAsBigInt(onChainData[0]), props.vault.decimals),
@@ -169,7 +165,7 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 			autoCoumpoundingVaultBalance: isZeroAddress(address)
 				? toNormalizedBN(0)
 				: toNormalizedBN(decodeAsBigInt(onChainData[8]), props.vault.decimals),
-			stakingAPR: rewardsPerWeek
+			weeklyStakingRewards: rewardsPerWeek
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
@@ -199,6 +195,21 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 		props.vault.vaultAddress
 	]);
 
+	const expectedAutoCompoundAPR = useMemo((): number => {
+		const weeklyRewards = Number(onChainVault?.weeklyStakingRewards || 0);
+		const priceOfRewardToken = Number(pricesForVault?.rewardToken?.normalized || 0);
+		const vaultTotalSupply = Number(onChainVault?.totalVaultSupply?.normalized || 0);
+		const expectedAPR = ((weeklyRewards * priceOfRewardToken) / vaultTotalSupply) * 52 * 100;
+		if (isNaN(expectedAPR)) {
+			return 0;
+		}
+		return expectedAPR;
+	}, [
+		onChainVault?.totalVaultSupply?.normalized,
+		onChainVault?.weeklyStakingRewards,
+		pricesForVault?.rewardToken?.normalized
+	]);
+
 	return (
 		<div className={'mb-16'}>
 			<div className={'flex w-full rounded-2xl bg-neutral-800 pb-3 pr-1'}>
@@ -213,7 +224,7 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 							prices: pricesForVault,
 							onChainData: onChainVault,
 							yDaemonData: yDaemonVault as TYDaemonVault,
-							yDaemonAutoCompoundingData: undefined
+							autoCompoundingAPR: 0
 						}}
 						onRefreshVaultData={onRefreshVaultData}
 					/>
@@ -223,7 +234,7 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 							prices: pricesForVault,
 							onChainData: onChainVault,
 							yDaemonData: yDaemonVault as TYDaemonVault,
-							yDaemonAutoCompoundingData: yDaemonAutoCompoundingVault as TYDaemonVault
+							autoCompoundingAPR: expectedAutoCompoundAPR
 						}}
 						onRefreshVaultData={onRefreshVaultData}
 					/>

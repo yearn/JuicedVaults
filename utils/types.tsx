@@ -32,10 +32,10 @@ export type TVaultData = TVaultListItem & {
 
 				autoCoumpoundingVaultSupply: TNormalizedBN;
 				autoCoumpoundingVaultBalance: TNormalizedBN;
-				stakingAPR: number;
+				weeklyStakingRewards: number;
 		  }
 		| undefined;
 	prices: TPriceData | undefined;
 	yDaemonData: TYDaemonVault;
-	yDaemonAutoCompoundingData: TYDaemonVault | undefined;
+	autoCompoundingAPR: number;
 };

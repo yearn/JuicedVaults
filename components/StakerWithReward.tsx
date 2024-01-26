@@ -391,7 +391,7 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 				<b
 					suppressHydrationWarning
 					className={'block break-all text-3xl text-neutral-900'}>
-					{`${formatWithUnit(Number(props.vault.onChainData?.stakingAPR || 0), 0, 0, {
+					{`${formatWithUnit(Number(props.vault.onChainData?.weeklyStakingRewards || 0), 0, 0, {
 						locales: ['en-US']
 					})}/week`}
 				</b>
@@ -456,7 +456,7 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 					<b
 						className={'block text-neutral-900'}
 						suppressHydrationWarning>
-						{`${formatWithUnit(Number(props.vault.onChainData?.stakingAPR || 0), 0, 0, {
+						{`${formatWithUnit(Number(props.vault.onChainData?.weeklyStakingRewards || 0), 0, 0, {
 							locales: ['en-US']
 						})}/week`}
 					</b>
