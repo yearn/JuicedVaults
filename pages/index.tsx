@@ -132,6 +132,19 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 				address: props.vault.autoCompoundingAddress,
 				functionName: 'balanceOf',
 				args: [toAddress(address)]
+			},
+			// Price per share
+			{
+				abi: YVAULT_V3_ABI,
+				chainId: props.vault.chainID,
+				address: props.vault.vaultAddress,
+				functionName: 'pricePerShare'
+			},
+			{
+				abi: YVAULT_V3_ABI,
+				chainId: props.vault.chainID,
+				address: props.vault.autoCompoundingAddress,
+				functionName: 'pricePerShare'
 			}
 		]
 	});
@@ -145,6 +158,13 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 		const rewardDuration = toBigInt(onChainData?.[6]?.result?.[1]);
 		const rewardsPerWeek = rewardRate.normalized * Number(rewardDuration);
 		const rewardContractTotalSupply = toNormalizedBN(decodeAsBigInt(onChainData[3]), props.vault.decimals);
+		const vaultPricePerShare = toNormalizedBN(toBigInt(onChainData?.[9]?.result), props.vault.decimals);
+		const autoCompoundingVaultPricePerShare = toNormalizedBN(
+			toBigInt(onChainData?.[10]?.result),
+			props.vault.decimals
+		);
+
+		console.log({vaultPricePerShare, autoCompoundingVaultPricePerShare});
 
 		set_onChainVault({
 			totalVaultSupply: toNormalizedBN(decodeAsBigInt(onChainData[0]), props.vault.decimals),
@@ -165,7 +185,9 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 			autoCoumpoundingVaultBalance: isZeroAddress(address)
 				? toNormalizedBN(0)
 				: toNormalizedBN(decodeAsBigInt(onChainData[8]), props.vault.decimals),
-			weeklyStakingRewards: rewardsPerWeek
+			weeklyStakingRewards: rewardsPerWeek,
+			vaultPricePerShare,
+			autoCompoundingVaultPricePerShare
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [

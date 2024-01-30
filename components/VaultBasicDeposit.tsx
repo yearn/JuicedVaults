@@ -180,13 +180,39 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
 	const {provider} = useWeb3();
 	const [amount, set_amount] = useState<TNormalizedBN | undefined>(undefined);
+	const [isMax, set_isMax] = useState(false);
 	const [withdrawStatus, set_withdrawStatus] = useState(defaultTxStatus);
+	const actualBalanceInToken = useMemo((): TNormalizedBN => {
+		return toNormalizedBN(
+			((props.vault?.onChainData?.vaultBalanceOf?.raw || 0n) *
+				(props?.vault?.onChainData?.vaultPricePerShare.raw || 0n)) /
+				toBigInt(10 ** props.vault.decimals)
+		);
+	}, [
+		props.vault?.onChainData?.vaultBalanceOf?.raw,
+		props.vault?.onChainData?.vaultPricePerShare.raw,
+		props.vault.decimals
+	]);
+
+	const converToYVToken = useCallback(
+		(value: bigint): TNormalizedBN => {
+			return toNormalizedBN(
+				(value * toBigInt(10 ** props.vault.decimals)) /
+					toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
+			);
+		},
+		[props.vault.onChainData?.vaultPricePerShare.raw, props.vault.decimals]
+	);
 
 	const onWithdraw = useCallback(async (): Promise<void> => {
+		let actualValue = converToYVToken(amount?.raw || 0n);
+		if (isMax) {
+			actualValue = props.vault.onChainData?.vaultBalanceOf || toNormalizedBN(0);
+		}
 		const result = await redeemV3Shares({
 			connector: provider,
 			chainID: props.vault.chainID,
-			amount: toBigInt(amount?.raw),
+			amount: toBigInt(actualValue?.raw),
 			contractAddress: props.vault.vaultAddress,
 			statusHandler: set_withdrawStatus
 		});
@@ -195,7 +221,7 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 			set_amount(undefined);
 			toast.success(`You successfully withdrew your ${props.vault.tokenSymbol}.`);
 		}
-	}, [provider, props, amount?.raw]);
+	}, [converToYVToken, amount?.raw, isMax, provider, props]);
 
 	return (
 		<div className={'pt-6'}>
@@ -211,16 +237,17 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 					min={0}
 					autoComplete={'off'}
 					value={amount === undefined ? '' : amount.normalized}
-					onChange={e =>
-						set_amount(onInput(e, props.vault.decimals, props.vault.onChainData?.vaultBalanceOf))
-					}
+					onChange={e => {
+						set_amount(onInput(e, props.vault.decimals, actualBalanceInToken));
+						set_isMax(false);
+					}}
 				/>
 				<button
 					onClick={onWithdraw}
 					disabled={
 						!provider ||
 						toBigInt(amount?.raw) === 0n ||
-						toBigInt(amount?.raw) > toBigInt(props.vault.onChainData?.vaultBalanceOf?.raw || 0n)
+						toBigInt(amount?.raw) > toBigInt(actualBalanceInToken?.raw || 0n)
 					}
 					className={cl(
 						'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
@@ -242,12 +269,13 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 			</div>
 			<button
 				suppressHydrationWarning
-				disabled={
-					!props.vault.onChainData?.vaultBalanceOf || props.vault.onChainData?.vaultBalanceOf.raw === 0n
-				}
-				onClick={() => set_amount(props.vault?.onChainData?.vaultBalanceOf || toNormalizedBN(0))}
+				disabled={!actualBalanceInToken || actualBalanceInToken.raw === 0n}
+				onClick={() => {
+					set_amount(actualBalanceInToken || toNormalizedBN(0));
+					set_isMax(true);
+				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`${formatAmount(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0, 4)} available to withdraw`}
+				{`${formatAmount(actualBalanceInToken?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to withdraw`}
 			</button>
 		</div>
 	);
@@ -255,15 +283,34 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 
 export function DesktopStats(props: {vault: TVaultData}): ReactElement {
 	const depositedAndStaked = useMemo((): number => {
-		return (
-			(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0) +
-			(props.vault?.onChainData?.stakingBalanceOf?.normalized || 0) +
-			(props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0)
-		);
+		const vaultValue =
+			(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0) *
+			(props?.vault?.onChainData?.vaultPricePerShare.normalized || 0);
+		const rewardValue =
+			(props.vault?.onChainData?.stakingBalanceOf?.normalized || 0) *
+			(props?.vault?.onChainData?.vaultPricePerShare.normalized || 0);
+		const autocompoundingValue =
+			(props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0) *
+			(props?.vault?.onChainData?.autoCompoundingVaultPricePerShare.normalized || 0) *
+			(props?.vault?.onChainData?.vaultPricePerShare.normalized || 0);
+
+		return vaultValue + rewardValue + autocompoundingValue;
 	}, [
 		props.vault?.onChainData?.vaultBalanceOf?.normalized,
 		props.vault?.onChainData?.stakingBalanceOf?.normalized,
-		props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized
+		props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized,
+		props?.vault?.onChainData?.vaultPricePerShare.normalized,
+		props?.vault?.onChainData?.autoCompoundingVaultPricePerShare.normalized
+	]);
+
+	const totalTAL = useMemo((): number => {
+		return (
+			(props.vault?.onChainData?.totalStakingSupply?.normalized || 0) +
+			(props.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized || 0)
+		);
+	}, [
+		props.vault?.onChainData?.totalStakingSupply?.normalized,
+		props.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized
 	]);
 
 	return (
@@ -281,13 +328,9 @@ export function DesktopStats(props: {vault: TVaultData}): ReactElement {
 				<b
 					className={'block text-3xl text-beige'}
 					suppressHydrationWarning>
-					{formatWithUnit(
-						(props?.vault?.onChainData?.totalVaultSupply?.normalized || 0) *
-							(props.vault.prices?.underlyingToken?.normalized || 0),
-						2,
-						2,
-						{locales: ['en-US']}
-					)}
+					{formatWithUnit(totalTAL * (props.vault.prices?.underlyingToken?.normalized || 0), 2, 2, {
+						locales: ['en-US']
+					})}
 				</b>
 			</div>
 			<div

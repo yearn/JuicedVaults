@@ -29,6 +29,8 @@ export type TVaultData = TVaultListItem & {
 				totalStakingSupply: TNormalizedBN;
 				stakingBalanceOf: TNormalizedBN;
 				rewardEarned: TNormalizedBN;
+				vaultPricePerShare: TNormalizedBN;
+				autoCompoundingVaultPricePerShare: TNormalizedBN;
 
 				autoCoumpoundingVaultSupply: TNormalizedBN;
 				autoCoumpoundingVaultBalance: TNormalizedBN;

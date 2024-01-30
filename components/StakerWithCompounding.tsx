@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import toast from 'react-hot-toast';
 import {erc20ABI, useContractRead} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
@@ -28,8 +28,31 @@ import type {TVaultData} from '@utils/types';
 function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
 	const {address, provider} = useWeb3();
 	const [amount, set_amount] = useState<TNormalizedBN | undefined>(undefined);
+	const [isMax, set_isMax] = useState(false);
 	const [approveStatus, set_approveStatus] = useState(defaultTxStatus);
 	const [depositStatus, set_depositStatus] = useState(defaultTxStatus);
+
+	const actualBalanceInToken = useMemo((): TNormalizedBN => {
+		return toNormalizedBN(
+			((props.vault?.onChainData?.vaultBalanceOf?.raw || 0n) *
+				(props?.vault?.onChainData?.vaultPricePerShare.raw || 0n)) /
+				toBigInt(10 ** props.vault.decimals)
+		);
+	}, [
+		props.vault?.onChainData?.vaultBalanceOf?.raw,
+		props.vault?.onChainData?.vaultPricePerShare.raw,
+		props.vault.decimals
+	]);
+
+	const converToYVToken = useCallback(
+		(value: bigint): TNormalizedBN => {
+			return toNormalizedBN(
+				(value * toBigInt(10 ** props.vault.decimals)) /
+					toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
+			);
+		},
+		[props.vault.onChainData?.vaultPricePerShare.raw, props.vault.decimals]
+	);
 
 	const {data: hasAllowance, refetch: onRefreshAllowance} = useContractRead({
 		abi: erc20ABI,
@@ -72,10 +95,14 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 	}, [approveStatus.pending, provider, props, onRefreshAllowance]);
 
 	const onDeposit = useCallback(async (): Promise<void> => {
+		let actualValue = converToYVToken(amount?.raw || 0n);
+		if (isMax) {
+			actualValue = props.vault.onChainData?.vaultBalanceOf || toNormalizedBN(0);
+		}
 		const result = await depositERC20({
 			connector: provider,
 			chainID: props.vault.chainID,
-			amount: toBigInt(amount?.raw),
+			amount: toBigInt(actualValue?.raw),
 			contractAddress: props.vault.autoCompoundingAddress,
 			statusHandler: set_depositStatus
 		});
@@ -87,7 +114,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				`You staked ${amount?.normalized} ${props.vault.tokenSymbol} and are now earning juiced APR.`
 			);
 		}
-	}, [provider, props, amount?.raw, amount?.normalized, onRefreshAllowance]);
+	}, [converToYVToken, amount?.raw, amount?.normalized, isMax, provider, props, onRefreshAllowance]);
 
 	function renderApproveButton(): ReactElement {
 		return (
@@ -96,7 +123,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				disabled={
 					!provider ||
 					toBigInt(amount?.raw) === 0n ||
-					toBigInt(amount?.raw) > toBigInt(props.vault.onChainData?.vaultBalanceOf?.raw || 0n)
+					toBigInt(amount?.raw) > toBigInt(actualBalanceInToken?.raw || 0n)
 				}
 				className={cl(
 					'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
@@ -125,7 +152,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				disabled={
 					!provider ||
 					toBigInt(amount?.raw) === 0n ||
-					toBigInt(amount?.raw) > toBigInt(props.vault.onChainData?.vaultBalanceOf?.raw || 0n)
+					toBigInt(amount?.raw) > toBigInt(actualBalanceInToken?.raw || 0n)
 				}
 				className={cl(
 					'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
@@ -161,20 +188,22 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 					min={0}
 					autoComplete={'off'}
 					value={amount === undefined ? '' : amount.normalized}
-					onChange={e =>
-						set_amount(onInput(e, props.vault.decimals, props.vault.onChainData?.vaultBalanceOf))
-					}
+					onChange={e => {
+						set_amount(onInput(e, props.vault.decimals, actualBalanceInToken));
+						set_isMax(false);
+					}}
 				/>
 				{hasAllowance ? renderStakeButton() : renderApproveButton()}
 			</div>
 			<button
 				suppressHydrationWarning
-				disabled={
-					!props.vault.onChainData?.vaultBalanceOf || props.vault.onChainData?.vaultBalanceOf.raw === 0n
-				}
-				onClick={() => set_amount(props.vault?.onChainData?.vaultBalanceOf || toNormalizedBN(0))}
+				disabled={!actualBalanceInToken || actualBalanceInToken.raw === 0n}
+				onClick={() => {
+					set_amount(actualBalanceInToken || toNormalizedBN(0));
+					set_isMax(true);
+				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`${formatAmount(props.vault?.onChainData?.vaultBalanceOf?.normalized || 0, 4)} available to stake`}
+				{`${formatAmount(actualBalanceInToken?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to stake`}
 			</button>
 		</div>
 	);
@@ -183,13 +212,49 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
 	const {provider} = useWeb3();
 	const [amount, set_amount] = useState<TNormalizedBN | undefined>(undefined);
+	const [isMax, set_isMax] = useState(false);
 	const [withdrawStatus, set_withdrawStatus] = useState(defaultTxStatus);
 
+	const actualBalanceInToken = useMemo((): TNormalizedBN => {
+		return toNormalizedBN(
+			((props.vault?.onChainData?.autoCoumpoundingVaultBalance?.raw || 0n) *
+				(props?.vault?.onChainData?.autoCompoundingVaultPricePerShare.raw || 0n) *
+				(props?.vault?.onChainData?.vaultPricePerShare.raw || 0n)) /
+				toBigInt(10 ** props.vault.decimals) /
+				toBigInt(10 ** props.vault.decimals)
+		);
+	}, [
+		props.vault?.onChainData?.autoCoumpoundingVaultBalance?.raw,
+		props.vault?.onChainData?.autoCompoundingVaultPricePerShare.raw,
+		props.vault?.onChainData?.vaultPricePerShare.raw,
+		props.vault.decimals
+	]);
+
+	const converToYVToken = useCallback(
+		(value: bigint): TNormalizedBN => {
+			return toNormalizedBN(
+				(value * toBigInt(10 ** props.vault.decimals) * toBigInt(10 ** props.vault.decimals)) /
+					toBigInt(props.vault.onChainData?.autoCompoundingVaultPricePerShare.raw) /
+					toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
+			);
+		},
+		[
+			props.vault.decimals,
+			props.vault.onChainData?.autoCompoundingVaultPricePerShare.raw,
+			props.vault.onChainData?.vaultPricePerShare.raw
+		]
+	);
+
 	const onUnstake = useCallback(async (): Promise<void> => {
+		let actualValue = converToYVToken(amount?.raw || 0n);
+		if (isMax) {
+			actualValue = props.vault.onChainData?.autoCoumpoundingVaultBalance || toNormalizedBN(0);
+		}
+
 		const result = await redeemV3Shares({
 			connector: provider,
 			chainID: props.vault.chainID,
-			amount: toBigInt(amount?.raw),
+			amount: toBigInt(actualValue?.raw),
 			contractAddress: props.vault.autoCompoundingAddress,
 			statusHandler: set_withdrawStatus
 		});
@@ -198,7 +263,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 			set_amount(undefined);
 			toast.success(`${props.vault.tokenSymbol} successfully unstaked.`);
 		}
-	}, [provider, props, amount?.raw]);
+	}, [converToYVToken, amount?.raw, isMax, provider, props]);
 
 	return (
 		<div className={'pb-2 pt-6 md:pb-[92px]'}>
@@ -214,19 +279,17 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 					min={0}
 					autoComplete={'off'}
 					value={amount === undefined ? '' : amount.normalized}
-					onChange={e =>
-						set_amount(
-							onInput(e, props.vault.decimals, props.vault.onChainData?.autoCoumpoundingVaultBalance)
-						)
-					}
+					onChange={e => {
+						set_isMax(false);
+						set_amount(onInput(e, props.vault.decimals, actualBalanceInToken));
+					}}
 				/>
 				<button
 					onClick={onUnstake}
 					disabled={
 						!provider ||
 						toBigInt(amount?.raw) === 0n ||
-						toBigInt(amount?.raw) >
-							toBigInt(props.vault.onChainData?.autoCoumpoundingVaultBalance?.raw || 0n)
+						toBigInt(amount?.raw) > toBigInt(actualBalanceInToken?.raw || 0n)
 					}
 					className={cl(
 						'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
@@ -248,13 +311,13 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 			</div>
 			<button
 				suppressHydrationWarning
-				disabled={
-					!props.vault.onChainData?.autoCoumpoundingVaultBalance ||
-					props.vault.onChainData?.autoCoumpoundingVaultBalance.raw === 0n
-				}
-				onClick={() => set_amount(props.vault?.onChainData?.autoCoumpoundingVaultBalance || toNormalizedBN(0))}
+				disabled={!actualBalanceInToken || actualBalanceInToken.raw === 0n}
+				onClick={() => {
+					set_isMax(true);
+					set_amount(actualBalanceInToken || toNormalizedBN(0));
+				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`${formatAmount(props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0, 4)} available to unstake`}
+				{`${formatAmount(actualBalanceInToken?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to unstake`}
 			</button>
 		</div>
 	);
@@ -265,6 +328,19 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 		props.vault.onChainData?.vaultBalanceOf?.raw !== 0n ||
 		props.vault.onChainData?.stakingBalanceOf?.raw !== 0n ||
 		props.vault.onChainData?.autoCoumpoundingVaultBalance?.raw !== 0n;
+
+	const depositedAndStaked = useMemo((): number => {
+		const autocompoundingValue =
+			(props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0) *
+			(props?.vault?.onChainData?.autoCompoundingVaultPricePerShare.normalized || 0) *
+			(props?.vault?.onChainData?.vaultPricePerShare.normalized || 0);
+
+		return autocompoundingValue;
+	}, [
+		props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized,
+		props?.vault?.onChainData?.vaultPricePerShare.normalized,
+		props?.vault?.onChainData?.autoCompoundingVaultPricePerShare.normalized
+	]);
 
 	return (
 		<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
@@ -306,7 +382,7 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 					<b
 						className={'block text-neutral-900'}
 						suppressHydrationWarning>
-						{`${formatAmount(props.vault.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
+						{`${formatAmount(depositedAndStaked, 4)} ${props.vault.tokenSymbol}`}
 					</b>
 				</div>
 			) : (
@@ -325,6 +401,19 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 }
 
 function MobileStats(props: {vault: TVaultData}): ReactElement {
+	const depositedAndStaked = useMemo((): number => {
+		const autocompoundingValue =
+			(props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0) *
+			(props?.vault?.onChainData?.autoCompoundingVaultPricePerShare.normalized || 0) *
+			(props?.vault?.onChainData?.vaultPricePerShare.normalized || 0);
+
+		return autocompoundingValue;
+	}, [
+		props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized,
+		props?.vault?.onChainData?.vaultPricePerShare.normalized,
+		props?.vault?.onChainData?.autoCompoundingVaultPricePerShare.normalized
+	]);
+
 	return (
 		<div className={'grid md:hidden'}>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4'}>
@@ -347,13 +436,7 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 					<b
 						className={'block text-neutral-900'}
 						suppressHydrationWarning>
-						{formatWithUnit(
-							(props?.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized || 0) *
-								(props.vault.prices?.vaultToken?.normalized || 0),
-							2,
-							2,
-							{locales: ['en-US']}
-						)}
+						{`${formatAmount(depositedAndStaked, 4)} ${props.vault.tokenSymbol}`}
 					</b>
 				</div>
 
