@@ -17,7 +17,7 @@ import {
 import {approveERC20, defaultTxStatus, getNetwork} from '@builtbymom/web3/utils/wagmi';
 import {IconSpinner} from '@icons/IconSpinner';
 import {depositERC20, redeemV3Shares} from '@utils/actions';
-import {getVaultAPR, onInput, toSafeChainID} from '@utils/helpers';
+import {convertToYVToken, getVaultAPR, onInput, toSafeChainID} from '@utils/helpers';
 import {ImageWithFallback} from '@common/ImageWithFallback';
 
 import type {ReactElement} from 'react';
@@ -194,18 +194,12 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 		props.vault.decimals
 	]);
 
-	const converToYVToken = useCallback(
-		(value: bigint): TNormalizedBN => {
-			return toNormalizedBN(
-				(value * toBigInt(10 ** props.vault.decimals)) /
-					toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
-			);
-		},
-		[props.vault.onChainData?.vaultPricePerShare.raw, props.vault.decimals]
-	);
-
 	const onWithdraw = useCallback(async (): Promise<void> => {
-		let actualValue = converToYVToken(amount?.raw || 0n);
+		let actualValue = convertToYVToken(
+			amount?.raw || 0n,
+			props.vault.decimals,
+			toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
+		);
 		if (isMax) {
 			actualValue = props.vault.onChainData?.vaultBalanceOf || toNormalizedBN(0);
 		}
@@ -221,7 +215,7 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 			set_amount(undefined);
 			toast.success(`You successfully withdrew your ${props.vault.tokenSymbol}.`);
 		}
-	}, [converToYVToken, amount?.raw, isMax, provider, props]);
+	}, [amount?.raw, isMax, provider, props]);
 
 	return (
 		<div className={'pt-6'}>

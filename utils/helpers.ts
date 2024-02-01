@@ -1,4 +1,4 @@
-import {formatPercent, handleInputChangeValue, toBigInt} from '@builtbymom/web3/utils';
+import {formatPercent, handleInputChangeValue, toBigInt, toNormalizedBN} from '@builtbymom/web3/utils';
 
 import type {ChangeEvent} from 'react';
 import type {TYDaemonVault} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
@@ -47,4 +47,12 @@ export function onInput(
 		return balance;
 	}
 	return handleInputChangeValue(e.target.value, decimals);
+}
+
+export function convertToYVToken(value: bigint, decimals: number, pps: bigint): TNormalizedBN {
+	return toNormalizedBN((value * toBigInt(10 ** decimals)) / pps);
+}
+
+export function convertToYVYVToken(value: bigint, decimals: number, pps: bigint, underPps: bigint): TNormalizedBN {
+	return toNormalizedBN((value * toBigInt(10 ** decimals) * toBigInt(10 ** decimals)) / pps / underPps);
 }

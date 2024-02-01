@@ -19,7 +19,7 @@ import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {IconBigChevron} from '@icons/IconBigChevron';
 import {IconSpinner} from '@icons/IconSpinner';
 import {depositERC20, redeemV3Shares} from '@utils/actions';
-import {getVaultAPR, onInput} from '@utils/helpers';
+import {convertToYVToken, convertToYVYVToken, getVaultAPR, onInput} from '@utils/helpers';
 
 import type {ReactElement} from 'react';
 import type {TNormalizedBN} from '@builtbymom/web3/types';
@@ -43,16 +43,6 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 		props.vault?.onChainData?.vaultPricePerShare.raw,
 		props.vault.decimals
 	]);
-
-	const converToYVToken = useCallback(
-		(value: bigint): TNormalizedBN => {
-			return toNormalizedBN(
-				(value * toBigInt(10 ** props.vault.decimals)) /
-					toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
-			);
-		},
-		[props.vault.onChainData?.vaultPricePerShare.raw, props.vault.decimals]
-	);
 
 	const {data: hasAllowance, refetch: onRefreshAllowance} = useContractRead({
 		abi: erc20ABI,
@@ -95,7 +85,11 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 	}, [approveStatus.pending, provider, props, onRefreshAllowance]);
 
 	const onDeposit = useCallback(async (): Promise<void> => {
-		let actualValue = converToYVToken(amount?.raw || 0n);
+		let actualValue = convertToYVToken(
+			amount?.raw || 0n,
+			props.vault.decimals,
+			toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
+		);
 		if (isMax) {
 			actualValue = props.vault.onChainData?.vaultBalanceOf || toNormalizedBN(0);
 		}
@@ -114,7 +108,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				`You staked ${amount?.normalized} ${props.vault.tokenSymbol} and are now earning juiced APR.`
 			);
 		}
-	}, [converToYVToken, amount?.raw, amount?.normalized, isMax, provider, props, onRefreshAllowance]);
+	}, [amount?.raw, amount?.normalized, isMax, provider, props, onRefreshAllowance]);
 
 	function renderApproveButton(): ReactElement {
 		return (
@@ -230,23 +224,14 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 		props.vault.decimals
 	]);
 
-	const converToYVToken = useCallback(
-		(value: bigint): TNormalizedBN => {
-			return toNormalizedBN(
-				(value * toBigInt(10 ** props.vault.decimals) * toBigInt(10 ** props.vault.decimals)) /
-					toBigInt(props.vault.onChainData?.autoCompoundingVaultPricePerShare.raw) /
-					toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
-			);
-		},
-		[
-			props.vault.decimals,
-			props.vault.onChainData?.autoCompoundingVaultPricePerShare.raw,
-			props.vault.onChainData?.vaultPricePerShare.raw
-		]
-	);
-
 	const onUnstake = useCallback(async (): Promise<void> => {
-		let actualValue = converToYVToken(amount?.raw || 0n);
+		let actualValue = convertToYVYVToken(
+			amount?.raw || 0n,
+			props.vault.decimals,
+			toBigInt(props.vault.onChainData?.autoCompoundingVaultPricePerShare.raw),
+			toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
+		);
+
 		if (isMax) {
 			actualValue = props.vault.onChainData?.autoCoumpoundingVaultBalance || toNormalizedBN(0);
 		}
@@ -263,7 +248,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 			set_amount(undefined);
 			toast.success(`${props.vault.tokenSymbol} successfully unstaked.`);
 		}
-	}, [converToYVToken, amount?.raw, isMax, provider, props]);
+	}, [amount?.raw, isMax, provider, props]);
 
 	return (
 		<div className={'pb-2 pt-6 md:pb-[92px]'}>
