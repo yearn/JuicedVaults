@@ -298,14 +298,8 @@ export function DesktopStats(props: {vault: TVaultData}): ReactElement {
 	]);
 
 	const totalTAL = useMemo((): number => {
-		return (
-			(props.vault?.onChainData?.totalStakingSupply?.normalized || 0) +
-			(props.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized || 0)
-		);
-	}, [
-		props.vault?.onChainData?.totalStakingSupply?.normalized,
-		props.vault?.onChainData?.autoCoumpoundingVaultSupply?.normalized
-	]);
+		return props.vault?.onChainData?.totalVaultSupply?.normalized || 0;
+	}, [props.vault?.onChainData?.totalVaultSupply]);
 
 	return (
 		<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
