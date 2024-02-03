@@ -186,7 +186,8 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 		return toNormalizedBN(
 			((props.vault?.onChainData?.vaultBalanceOf?.raw || 0n) *
 				(props?.vault?.onChainData?.vaultPricePerShare.raw || 0n)) /
-				toBigInt(10 ** props.vault.decimals)
+				toBigInt(10 ** props.vault.decimals),
+			props.vault.decimals
 		);
 	}, [
 		props.vault?.onChainData?.vaultBalanceOf?.raw,

@@ -36,7 +36,8 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 		return toNormalizedBN(
 			((props.vault?.onChainData?.vaultBalanceOf?.raw || 0n) *
 				(props?.vault?.onChainData?.vaultPricePerShare.raw || 0n)) /
-				toBigInt(10 ** props.vault.decimals)
+				toBigInt(10 ** props.vault.decimals),
+			props.vault.decimals
 		);
 	}, [
 		props.vault?.onChainData?.vaultBalanceOf?.raw,
@@ -210,7 +211,8 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 		return toNormalizedBN(
 			((props.vault?.onChainData?.stakingBalanceOf?.raw || 0n) *
 				(props?.vault?.onChainData?.vaultPricePerShare.raw || 0n)) /
-				toBigInt(10 ** props.vault.decimals)
+				toBigInt(10 ** props.vault.decimals),
+			props.vault.decimals
 		);
 	}, [
 		props.vault?.onChainData?.stakingBalanceOf?.raw,
@@ -351,7 +353,7 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 					) : (
 						<Counter
 							value={props?.vault?.onChainData?.rewardEarned?.normalized || 0}
-							decimals={18}
+							decimals={props?.vault?.decimals || 18}
 						/>
 					)}
 				</div>
