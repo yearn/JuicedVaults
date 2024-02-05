@@ -50,9 +50,9 @@ export function onInput(
 }
 
 export function convertToYVToken(value: bigint, decimals: number, pps: bigint): TNormalizedBN {
-	return toNormalizedBN((value * toBigInt(10 ** decimals)) / pps);
+	return toNormalizedBN((value * toBigInt(10 ** decimals)) / pps, decimals);
 }
 
 export function convertToYVYVToken(value: bigint, decimals: number, pps: bigint, underPps: bigint): TNormalizedBN {
-	return toNormalizedBN((value * toBigInt(10 ** decimals) * toBigInt(10 ** decimals)) / pps / underPps);
+	return toNormalizedBN((value * toBigInt(10 ** decimals) * toBigInt(10 ** decimals)) / pps / underPps, decimals);
 }

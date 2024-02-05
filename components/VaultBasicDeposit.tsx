@@ -12,7 +12,8 @@ import {
 	MAX_UINT_256,
 	toAddress,
 	toBigInt,
-	toNormalizedBN
+	toNormalizedBN,
+	zeroNormalizedBN
 } from '@builtbymom/web3/utils';
 import {approveERC20, defaultTxStatus, getNetwork} from '@builtbymom/web3/utils/wagmi';
 import {IconSpinner} from '@icons/IconSpinner';
@@ -169,7 +170,7 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 				disabled={
 					!props.vault.onChainData?.tokenBalanceOf || props.vault.onChainData?.tokenBalanceOf.raw === 0n
 				}
-				onClick={() => set_amount(props.vault?.onChainData?.tokenBalanceOf || toNormalizedBN(0))}
+				onClick={() => set_amount(props.vault?.onChainData?.tokenBalanceOf || zeroNormalizedBN)}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
 				{`${formatAmount(props.vault?.onChainData?.tokenBalanceOf?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to deposit`}
 			</button>
@@ -202,7 +203,7 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 			toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
 		);
 		if (isMax) {
-			actualValue = props.vault.onChainData?.vaultBalanceOf || toNormalizedBN(0);
+			actualValue = props.vault.onChainData?.vaultBalanceOf || zeroNormalizedBN;
 		}
 		const result = await redeemV3Shares({
 			connector: provider,
@@ -266,7 +267,7 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 				suppressHydrationWarning
 				disabled={!actualBalanceInToken || actualBalanceInToken.raw === 0n}
 				onClick={() => {
-					set_amount(actualBalanceInToken || toNormalizedBN(0));
+					set_amount(actualBalanceInToken || zeroNormalizedBN);
 					set_isMax(true);
 				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>

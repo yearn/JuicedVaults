@@ -12,7 +12,8 @@ import {
 	MAX_UINT_256,
 	toAddress,
 	toBigInt,
-	toNormalizedBN
+	toNormalizedBN,
+	zeroNormalizedBN
 } from '@builtbymom/web3/utils';
 import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {IconBigChevron} from '@icons/IconBigChevron';
@@ -91,7 +92,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 			toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
 		);
 		if (isMax) {
-			actualValue = props.vault.onChainData?.vaultBalanceOf || toNormalizedBN(0);
+			actualValue = props.vault.onChainData?.vaultBalanceOf || zeroNormalizedBN;
 		}
 
 		const result = await stakeERC20({
@@ -192,7 +193,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				suppressHydrationWarning
 				disabled={!actualBalanceInToken || actualBalanceInToken.raw === 0n}
 				onClick={() => {
-					set_amount(actualBalanceInToken || toNormalizedBN(0));
+					set_amount(actualBalanceInToken || zeroNormalizedBN);
 					set_isMax(true);
 				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
@@ -227,7 +228,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 			toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
 		);
 		if (isMax) {
-			actualValue = props.vault.onChainData?.stakingBalanceOf || toNormalizedBN(0);
+			actualValue = props.vault.onChainData?.stakingBalanceOf || zeroNormalizedBN;
 		}
 		const result = await unstakeSome({
 			connector: provider,
@@ -293,7 +294,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 					!props.vault.onChainData?.stakingBalanceOf || props.vault.onChainData?.stakingBalanceOf.raw === 0n
 				}
 				onClick={() => {
-					set_amount(actualBalanceInTokenForStaking || toNormalizedBN(0));
+					set_amount(actualBalanceInTokenForStaking || zeroNormalizedBN);
 					set_isMax(true);
 				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>

@@ -13,7 +13,8 @@ import {
 	toAddress,
 	toBigInt,
 	toNormalizedBN,
-	truncateHex
+	truncateHex,
+	zeroNormalizedBN
 } from '@builtbymom/web3/utils';
 import {useAccountModal} from '@rainbow-me/rainbowkit';
 import {useIntervalEffect} from '@react-hookz/web';
@@ -169,21 +170,21 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 		set_onChainVault({
 			totalVaultSupply: toNormalizedBN(decodeAsBigInt(onChainData[0]), props.vault.decimals),
 			vaultBalanceOf: isZeroAddress(address)
-				? toNormalizedBN(0)
+				? zeroNormalizedBN
 				: toNormalizedBN(decodeAsBigInt(onChainData[1]), props.vault.decimals),
 			tokenBalanceOf: isZeroAddress(address)
-				? toNormalizedBN(0)
+				? zeroNormalizedBN
 				: toNormalizedBN(decodeAsBigInt(onChainData[2]), props.vault.decimals),
 			totalStakingSupply: rewardContractTotalSupply,
 			stakingBalanceOf: isZeroAddress(address)
-				? toNormalizedBN(0)
+				? zeroNormalizedBN
 				: toNormalizedBN(decodeAsBigInt(onChainData[4]), props.vault.decimals),
 			rewardEarned: isZeroAddress(address)
-				? toNormalizedBN(0)
+				? zeroNormalizedBN
 				: toNormalizedBN(decodeAsBigInt(onChainData[5]), 18),
 			autoCoumpoundingVaultSupply: toNormalizedBN(decodeAsBigInt(onChainData[7]), props.vault.decimals),
 			autoCoumpoundingVaultBalance: isZeroAddress(address)
-				? toNormalizedBN(0)
+				? zeroNormalizedBN
 				: toNormalizedBN(decodeAsBigInt(onChainData[8]), props.vault.decimals),
 			weeklyStakingRewards: rewardsPerWeek,
 			vaultPricePerShare,
