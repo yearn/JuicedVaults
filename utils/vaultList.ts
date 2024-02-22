@@ -33,7 +33,7 @@ export const VAULT_LIST: TVaultListItem[] = [
  		rewardSymbol: 'AJNA',
  		decimals: 18,
  		chainID: 1,
- 		vaultAddress: toAddress('0xe24BA27551aBE96Ca401D39761cA2319Ea14e3CB'), //yvWETH
+ 		vaultAddress: toAddress('0x503e0BaB6acDAE73eA7fb7cf6Ae5792014dbe935'), //yvWETH
  		tokenAddress: toAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'), //WETH
  		autoCompoundingAddress: toAddress('0xb974598227660bEfe79a23DFC473D859602254aC'), //yvyvWETH
  		stakingAddress: toAddress('0x0Ed535037c013c3628512980C169Ed59Eb805B49'), //stakedyvWETH
