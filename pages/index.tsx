@@ -164,9 +164,6 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 			toBigInt(onChainData?.[10]?.result),
 			props.vault.decimals
 		);
-
-		console.log({vaultPricePerShare, autoCompoundingVaultPricePerShare});
-
 		set_onChainVault({
 			totalVaultSupply: toNormalizedBN(decodeAsBigInt(onChainData[0]), props.vault.decimals),
 			vaultBalanceOf: isZeroAddress(address)

@@ -4,15 +4,15 @@ import type {TVaultListItem} from './types';
 
 export const VAULT_LIST: TVaultListItem[] = [
 	{
- 		name: 'yvAjnaWETH',
- 		tokenSymbol: 'WETH',
- 		rewardSymbol: 'AJNA',
- 		decimals: 18,
- 		chainID: 1,
- 		vaultAddress: toAddress('0x503e0BaB6acDAE73eA7fb7cf6Ae5792014dbe935'), //yvWETH
- 		tokenAddress: toAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'), //WETH
- 		autoCompoundingAddress: toAddress('0xb974598227660bEfe79a23DFC473D859602254aC'), //yvyvWETH
- 		stakingAddress: toAddress('0x0Ed535037c013c3628512980C169Ed59Eb805B49'), //stakedyvWETH
+		name: 'yvAjnaWETH',
+		tokenSymbol: 'WETH',
+		rewardSymbol: 'AJNA',
+		decimals: 18,
+		chainID: 1,
+		vaultAddress: toAddress('0x503e0BaB6acDAE73eA7fb7cf6Ae5792014dbe935'), //yvWETH
+		tokenAddress: toAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'), //WETH
+		autoCompoundingAddress: toAddress('0xb974598227660bEfe79a23DFC473D859602254aC'), //yvyvWETH
+		stakingAddress: toAddress('0x0Ed535037c013c3628512980C169Ed59Eb805B49'), //stakedyvWETH
 		rewardAddress: toAddress('0x9a96ec9B57Fb64FbC60B423d1f4da7691Bd35079') //Ajna
 	},
 	{
