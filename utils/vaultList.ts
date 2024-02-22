@@ -26,5 +26,17 @@ export const VAULT_LIST: TVaultListItem[] = [
 		autoCompoundingAddress: toAddress('0x4987d1856F93DFf29e08aa605A805FaF43dC3103'), //yvyvUSDC
 		stakingAddress: toAddress('0x602920E7e0a335137E02DF139CdF8D1381DAdBfD'), //stakedUSDC
 		rewardAddress: toAddress('0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270') //wMATIC
+	},
+	{
+ 		name: 'yvAjnaWETH',
+ 		tokenSymbol: 'WETH',
+ 		rewardSymbol: 'AJNA',
+ 		decimals: 18,
+ 		chainID: 1,
+ 		vaultAddress: toAddress('0xe24BA27551aBE96Ca401D39761cA2319Ea14e3CB'), //yvWETH
+ 		tokenAddress: toAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'), //WETH
+ 		autoCompoundingAddress: toAddress('0xb974598227660bEfe79a23DFC473D859602254aC'), //yvyvWETH
+ 		stakingAddress: toAddress('0x0Ed535037c013c3628512980C169Ed59Eb805B49'), //stakedyvWETH
+		rewardAddress: toAddress('0x9a96ec9B57Fb64FbC60B423d1f4da7691Bd35079') //Ajna
 	}
 ];
