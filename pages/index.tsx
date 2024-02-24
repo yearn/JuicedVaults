@@ -219,7 +219,8 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 		const weeklyRewards = Number(onChainVault?.weeklyStakingRewards || 0);
 		const priceOfRewardToken = Number(pricesForVault?.rewardToken?.normalized || 0);
 		const vaultTotalSupply = Number(onChainVault?.totalVaultSupply?.normalized || 0);
-		const expectedAPR = ((weeklyRewards * priceOfRewardToken) / vaultTotalSupply) * 52 * 100;
+		const vaultTokenPrice = Number(pricesForVault?.vaultToken?.normalized || 0);
+		const expectedAPR = ((weeklyRewards * priceOfRewardToken) / (vaultTotalSupply * vaultTokenPrice)) * 52 * 100;
 		if (isNaN(expectedAPR)) {
 			return 0;
 		}
@@ -227,7 +228,8 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 	}, [
 		onChainVault?.totalVaultSupply?.normalized,
 		onChainVault?.weeklyStakingRewards,
-		pricesForVault?.rewardToken?.normalized
+		pricesForVault?.rewardToken?.normalized,
+		pricesForVault?.vaultToken?.normalized
 	]);
 
 	return (
