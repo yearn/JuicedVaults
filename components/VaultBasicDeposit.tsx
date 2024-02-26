@@ -328,7 +328,7 @@ export function DesktopStats(props: {vault: TVaultData}): ReactElement {
 					'col-span-2 flex items-center justify-between rounded-lg border-2',
 					'leading-4 border-neutral-900 bg-carbon p-4'
 				)}>
-				<b className={'block text-beige'}>{'You deposited'}</b>
+				<b className={'block text-beige'}>{'Your deposit'}</b>
 				<b
 					className={'block text-beige'}
 					suppressHydrationWarning>
