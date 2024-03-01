@@ -36,6 +36,11 @@ function MyApp({Component, ...props}: AppProps): ReactElement {
 	return (
 		<>
 			<Head>
+				<script
+					defer
+					data-domain={'juiced.yearn.fi'}
+					src={'/js/script.js'}
+				/>
 				<style
 					jsx
 					global>
