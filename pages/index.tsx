@@ -1,22 +1,21 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import Image from 'next/image';
 import {HeaderTitle} from 'components/HeaderTitle';
-import {VaultBasicDeposit} from 'components/VaultBasicDeposit';
-import {VaultChoiceWrapper} from 'components/VaultChoiceWrapper';
+import {SearchBar} from 'components/SearchBar';
+import {StakerWithCompounding} from 'components/StakerWithCompounding';
+import {StakerWithReward} from 'components/StakerWithReward';
 import {erc20ABI, useContractReads} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useFetch} from '@builtbymom/web3/hooks/useFetch';
 import {
-	cl,
 	decodeAsBigInt,
 	isZeroAddress,
 	toAddress,
 	toBigInt,
 	toNormalizedBN,
-	truncateHex,
 	zeroNormalizedBN
 } from '@builtbymom/web3/utils';
-import {useAccountModal} from '@rainbow-me/rainbowkit';
+import {getNetwork} from '@builtbymom/web3/utils/wagmi';
 import {useIntervalEffect} from '@react-hookz/web';
 import {YVAULT_STAKING_ABI} from '@utils/abi/yVaultStaking.abi';
 import {YVAULT_V3_ABI} from '@utils/abi/yVaultV3.abi';
@@ -25,39 +24,21 @@ import {VAULT_LIST} from '@utils/vaultList';
 import {useYDaemonBaseURI} from '@yearn-finance/web-lib/hooks/useYDaemonBaseURI';
 import {useYearnPrices} from '@yearn-finance/web-lib/hooks/useYearnPrices';
 import {yDaemonVaultSchema} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
+import {ImageWithFallback} from '@common/ImageWithFallback';
 
+import type {TQuery} from 'components/SearchBar';
 import type {ReactElement} from 'react';
 import type {TYDaemonPricesChain} from '@yearn-finance/web-lib/utils/schemas/yDaemonPricesSchema';
 import type {TYDaemonVault} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
 import type {TVaultData, TVaultListItem} from '@utils/types';
-
-function ConnectBox(): ReactElement {
-	const {onConnect, address, ens} = useWeb3();
-	const {openAccountModal} = useAccountModal();
-
-	return (
-		<div className={'z-10 -mt-28 mb-10 w-full md:mb-16 md:w-1/2 md:pr-4'}>
-			<div className={'rounded-2xl border-2 border-neutral-900 bg-beige p-6'}>
-				<b className={'mb-2 block text-xl text-neutral-900'}>{'Freshly squeezed and bursting with yield.'}</b>
-				<p className={'mb-4 block whitespace-break-spaces text-base md:text-xl'}>
-					{'Let Yearn auto compound your rewards or claim them for yourself. '}
-				</p>
-				<button
-					suppressHydrationWarning
-					onClick={address ? openAccountModal : onConnect}
-					className={'h-10 rounded-lg border-2 border-neutral-900 bg-yellow px-5 text-base font-bold'}>
-					{address && ens ? ens : address ? truncateHex(address, 6) : 'Connect Wallet'}
-				</button>
-			</div>
-		</div>
-	);
-}
 
 function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}): ReactElement {
 	const {address} = useWeb3();
 	const {yDaemonBaseUri} = useYDaemonBaseURI({chainID: toSafeChainID(props.vault.chainID)});
 	const [onChainVault, set_onChainVault] = useState<TVaultData['onChainData']>(undefined);
 	const [nonce, set_nonce] = useState<number>(0);
+
+	const blockExplorer = getNetwork(props.vault.chainID).blockExplorers?.etherscan?.url;
 
 	useIntervalEffect(() => set_nonce(nonce + 1), 3500);
 
@@ -233,40 +214,71 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 	]);
 
 	return (
-		<div className={'mb-16'}>
-			<div className={'flex w-full rounded-2xl bg-neutral-800 pb-3 pr-1'}>
-				<div
-					className={cl(
-						'-mt-2 -ml-2 rounded-2xl border-2 border-neutral-900 bg-beige',
-						'grid grid-cols-1 gap-x-0 md:grid-cols-2 md:gap-x-6 w-full h-full'
-					)}>
-					<VaultBasicDeposit
-						vault={{
-							...props.vault,
-							prices: pricesForVault,
-							onChainData: onChainVault,
-							yDaemonData: yDaemonVault as TYDaemonVault,
-							autoCompoundingAPR: 0
-						}}
-						onRefreshVaultData={onRefreshVaultData}
-					/>
-					<VaultChoiceWrapper
-						vault={{
-							...props.vault,
-							prices: pricesForVault,
-							onChainData: onChainVault,
-							yDaemonData: yDaemonVault as TYDaemonVault,
-							autoCompoundingAPR: expectedAutoCompoundAPR
-						}}
-						onRefreshVaultData={onRefreshVaultData}
-					/>
+		<div className={'flex flex-col gap-8 rounded-lg border-4 border-neutral-900 p-4 md:px-8 md:py-6'}>
+			<div className={'flex gap-4'}>
+				<ImageWithFallback
+					alt={props.vault.tokenSymbol}
+					width={56}
+					height={56}
+					src={`${process.env.SMOL_ASSETS_URL}/token/${toSafeChainID(props.vault.chainID)}/${props.vault.tokenAddress}/logo-128.png`}
+					className={'size-8'}
+				/>
+				<div>
+					<h3 className={'text-xl font-bold'}>{props.vault.tokenSymbol}</h3>
+					<p>
+						{'Choose '}
+						<b className={'text-blue'}>{'Auto Compounding'}</b>
+						{' to enjoy boosted APR, or '}
+						<b className={'text-yellowHover'}>{'Manual Claim'}</b>{' '}
+						{'if you want to claim your tokens yourself.'}
+					</p>
 				</div>
 			</div>
+			<section className={'grid grid-cols-1 gap-4 md:grid-cols-2'}>
+				<StakerWithCompounding
+					vault={{
+						...props.vault,
+						prices: pricesForVault,
+						onChainData: onChainVault,
+						yDaemonData: yDaemonVault as TYDaemonVault,
+						autoCompoundingAPR: expectedAutoCompoundAPR
+					}}
+					onRefreshVaultData={onRefreshVaultData}
+				/>
+				<StakerWithReward
+					vault={{
+						...props.vault,
+						prices: pricesForVault,
+						onChainData: onChainVault,
+						yDaemonData: yDaemonVault as TYDaemonVault,
+						autoCompoundingAPR: expectedAutoCompoundAPR
+					}}
+					onRefreshVaultData={onRefreshVaultData}
+				/>
+			</section>
+			<footer className={'hidden flex-col justify-end gap-2 text-neutral-600 md:flex md:flex-row md:gap-6'}>
+				<p className={'text-xs'}>
+					{'Network: '}
+					{getNetwork(props.vault.chainID).name}
+				</p>
+				<p className={'text-xs '}>
+					<span>{'Contract: '}</span>
+					<a
+						className={'cursor-alias hover:underline'}
+						href={`${blockExplorer}/address/${props.vault.vaultAddress}`}
+						target={'_blank'}
+						rel={'noreferrer'}>
+						{props.vault.vaultAddress}
+					</a>
+				</p>
+			</footer>
 		</div>
 	);
 }
 
 function Home(): ReactElement {
+	const [queryArguments, set_queryArguments] = useState<TQuery>({});
+
 	const prices = useYearnPrices();
 
 	return (
@@ -277,20 +289,26 @@ function Home(): ReactElement {
 					loading={'eager'}
 					quality={95}
 					width={1136}
-					height={320}
+					height={396}
 					src={'/hero.svg'}
 					alt={'Hero'}
 					className={
-						'absolute inset-0 max-h-96 min-h-96 w-full object-cover object-center md:max-h-[471px] md:min-h-[471px]'
+						'absolute inset-0 max-h-96 min-h-96 w-full border-y-4 border-neutral-900 object-cover object-center md:max-h-[471px] md:min-h-[471px]'
 					}
 				/>
-				<div className={'mx-auto grid w-full max-w-6xl pt-10 md:pt-24'}>
-					<HeaderTitle className={'relative z-20 w-full md:w-[628px]'} />
+				<div className={'mx-auto w-full max-w-6xl items-center'}>
+					<HeaderTitle className={'relative z-20 w-full md:h-[460px] md:w-[628px]'} />
 				</div>
 			</div>
-			<div className={'h-0.5 w-full bg-neutral-900'} />
-			<section className={'mx-auto grid w-full max-w-6xl'}>
-				<ConnectBox />
+
+			<main className={'mx-auto grid w-full max-w-6xl gap-4'}>
+				<div className={'z-10 -mt-12 w-full rounded-lg border-4 border-neutral-900 bg-beige md:pr-4'}>
+					<SearchBar
+						queryArguments={queryArguments}
+						onChange={set_queryArguments}
+					/>
+				</div>
+
 				{VAULT_LIST.map(vault => (
 					<VaultList
 						key={vault.name}
@@ -298,7 +316,7 @@ function Home(): ReactElement {
 						vault={vault}
 					/>
 				))}
-			</section>
+			</main>
 		</div>
 	);
 }

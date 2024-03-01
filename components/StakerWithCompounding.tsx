@@ -17,7 +17,7 @@ import {
 	zeroNormalizedBN
 } from '@builtbymom/web3/utils';
 import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
-import {IconBigChevron} from '@icons/IconBigChevron';
+import {IconRecycle} from '@icons/IconRecycle';
 import {IconSpinner} from '@icons/IconSpinner';
 import {depositERC20, redeemV3Shares} from '@utils/actions';
 import {convertToYVToken, convertToYVYVToken, getVaultAPR, onInput} from '@utils/helpers';
@@ -26,7 +26,7 @@ import type {ReactElement} from 'react';
 import type {TNormalizedBN} from '@builtbymom/web3/types';
 import type {TVaultData} from '@utils/types';
 
-function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
+export function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
 	const {address, provider} = useWeb3();
 	const [amount, set_amount] = useState<TNormalizedBN | undefined>(undefined);
 	const [isMax, set_isMax] = useState(false);
@@ -165,19 +165,19 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 					)}>
 					<IconSpinner className={'text-neutral-900'} />
 				</div>
-				<p className={depositStatus.pending ? 'opacity-0' : 'opacity-100'}>{'Stake'}</p>
+				<p className={depositStatus.pending ? 'opacity-0' : 'opacity-100'}>{'Deposit'}</p>
 			</button>
 		);
 	}
 
 	return (
-		<div className={'pt-6'}>
-			<b className={'mb-2 block'}>{'Stake'}</b>
+		<div>
+			<b className={'mb-2 block'}>{'Deposit'}</b>
 			<div className={'flex flex-col gap-2 md:flex-row'}>
 				<input
 					className={cl(
 						'h-10 w-full overflow-x-scroll rounded-lg px-2 py-4 font-bold outline-none scrollbar-none',
-						'border-2 border-neutral-900 bg-neutral-0 font-normal font-number'
+						'border-2 border-neutral-900 font-normal font-number bg-beige'
 					)}
 					placeholder={'0.00'}
 					type={'number'}
@@ -199,13 +199,13 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 					set_isMax(true);
 				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`${formatAmount(actualBalanceInToken?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to stake`}
+				{`You have ${formatAmount(actualBalanceInToken?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
 			</button>
 		</div>
 	);
 }
 
-function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
+export function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
 	const {provider} = useWeb3();
 	const [amount, set_amount] = useState<TNormalizedBN | undefined>(undefined);
 	const [isMax, set_isMax] = useState(false);
@@ -254,13 +254,13 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 	}, [amount?.raw, isMax, provider, props]);
 
 	return (
-		<div className={'pb-2 pt-6 md:pb-[92px]'}>
-			<b className={'mb-2 block'}>{'Unstake'}</b>
+		<div className={'pb-2 md:pb-[92px]'}>
+			<b className={'mb-2 block'}>{'Withdraw'}</b>
 			<div className={'flex flex-col gap-2 md:flex-row'}>
 				<input
 					className={cl(
 						'h-10 w-full overflow-x-scroll rounded-lg px-2 py-4 font-bold outline-none scrollbar-none',
-						'border-2 border-neutral-900 bg-neutral-0 font-normal font-number'
+						'border-2 border-neutral-900 bg-beige font-normal font-number'
 					)}
 					placeholder={'0.00'}
 					type={'number'}
@@ -294,7 +294,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 						)}>
 						<IconSpinner className={'text-neutral-900'} />
 					</div>
-					<p className={withdrawStatus.pending ? 'opacity-0' : 'opacity-100'}>{'Unstake'}</p>
+					<p className={withdrawStatus.pending ? 'opacity-0' : 'opacity-100'}>{'Withdraw'}</p>
 				</button>
 			</div>
 			<button
@@ -305,18 +305,13 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 					set_amount(actualBalanceInToken || zeroNormalizedBN);
 				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`${formatAmount(actualBalanceInToken?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to unstake`}
+				{`You have ${formatAmount(actualBalanceInToken?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
 			</button>
 		</div>
 	);
 }
 
 function DesktopStats(props: {vault: TVaultData}): ReactElement {
-	const hasVaultTokens =
-		props.vault.onChainData?.vaultBalanceOf?.raw !== 0n ||
-		props.vault.onChainData?.stakingBalanceOf?.raw !== 0n ||
-		props.vault.onChainData?.autoCoumpoundingVaultBalance?.raw !== 0n;
-
 	const depositedAndStaked = useMemo((): number => {
 		const autocompoundingValue =
 			(props.vault?.onChainData?.autoCoumpoundingVaultBalance?.normalized || 0) *
@@ -332,11 +327,11 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 
 	return (
 		<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
-			<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4 leading-4'}>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-beige p-4 leading-4'}>
 				<b
 					suppressHydrationWarning
 					className={'block pb-2 text-neutral-900'}>
-					{'Extra APR: '}
+					{'APR '}
 					{getVaultAPR(props?.vault?.yDaemonData)}
 					{' +'}
 				</b>
@@ -346,7 +341,7 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 					{formatPercent(props.vault.autoCompoundingAPR, 2)}
 				</b>
 			</div>
-			<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4 leading-4'}>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-beige p-4 leading-4'}>
 				<b className={'block pb-2 text-neutral-900'}>{'TVL'}</b>
 				<b
 					className={'block text-3xl text-neutral-900'}
@@ -360,30 +355,18 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 					)}
 				</b>
 			</div>
-			{hasVaultTokens ? (
-				<div
-					className={cl(
-						'col-span-2 flex items-center justify-between rounded-lg',
-						'leading-4 border-2 border-neutral-900 bg-pink p-4'
-					)}>
-					<b className={'block text-neutral-900'}>{'You staked'}</b>
-					<b
-						className={'block text-neutral-900'}
-						suppressHydrationWarning>
-						{`${formatAmount(depositedAndStaked, 4)} ${props.vault.tokenSymbol}`}
-					</b>
-				</div>
-			) : (
-				<div
-					className={cl('col-span-2 rounded-lg grid gap-5 mb-36', 'border-2 border-neutral-900 bg-pink p-4')}>
-					<IconBigChevron className={'text-blue'} />
-					<p
-						className={'block text-xl text-neutral-900'}
-						suppressHydrationWarning>
-						{`Deposit on the left and *poof* you can juice your tokens with extra APR or extra ${props.vault.rewardSymbol}.`}
-					</p>
-				</div>
-			)}
+			<div
+				className={cl(
+					'col-span-2 flex items-center justify-between rounded-lg border-2',
+					'leading-4 border-neutral-900 bg-beige p-4'
+				)}>
+				<b className={'block '}>{'Your deposit'}</b>
+				<b
+					className={'block '}
+					suppressHydrationWarning>
+					{`${formatAmount(depositedAndStaked, 4)} ${props.vault.tokenSymbol}`}
+				</b>
+			</div>
 		</div>
 	);
 }
@@ -404,7 +387,7 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 
 	return (
 		<div className={'grid md:hidden'}>
-			<div className={'rounded-lg border-2 border-neutral-900 bg-pink p-4'}>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-beige p-4'}>
 				<div className={'flex items-center justify-between'}>
 					<p
 						suppressHydrationWarning
@@ -428,8 +411,8 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 					</b>
 				</div>
 
-				<div className={'mt-2 flex items-center justify-between border-t border-neutral-0/40 pt-2'}>
-					<p className={'block text-sm text-neutral-900'}>{'You staked'}</p>
+				<div className={'mt-2 flex items-center justify-between border-t border-neutral-900 pt-2'}>
+					<p className={'block text-sm text-neutral-900'}>{'Your deposit'}</p>
 					<b
 						className={'block text-neutral-900'}
 						suppressHydrationWarning>
@@ -442,22 +425,24 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 }
 
 export function StakerWithCompounding(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
-	const hasVaultTokens =
-		props.vault.onChainData?.vaultBalanceOf?.raw !== 0n ||
-		props.vault.onChainData?.stakingBalanceOf?.raw !== 0n ||
-		props.vault.onChainData?.autoCoumpoundingVaultBalance?.raw !== 0n;
-
 	return (
-		<div className={'p-2 pt-[30px] md:p-8'}>
-			<DesktopStats {...props} />
-			<MobileStats {...props} />
-
-			{hasVaultTokens ? (
-				<>
-					<StakeSection {...props} />
-					<UnstakeSection {...props} />
-				</>
-			) : null}
+		<div className={'flex flex-col gap-4 rounded-lg border-2 border-neutral-900 bg-blue px-4 py-6'}>
+			<header className={'flex items-center gap-4'}>
+				<div
+					className={cl(
+						'flex size-12 items-center justify-center rounded-full',
+						'bg-beige border-2 border-neutral-900'
+					)}>
+					<IconRecycle className={'size-8'} />
+				</div>
+				<h3 className={'text-lg font-bold uppercase'}>{'Auto compounding'}</h3>
+			</header>
+			<main className={'flex flex-col gap-6'}>
+				<DesktopStats {...props} />
+				<MobileStats {...props} />
+				<StakeSection {...props} />
+				<UnstakeSection {...props} />
+			</main>
 		</div>
 	);
 }
