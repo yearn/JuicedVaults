@@ -29,7 +29,7 @@ export async function redeemV3Shares(props: TRedeemV3Shares): Promise<TTxRespons
 			address: props.contractAddress,
 			abi: YVAULT_V3_ABI,
 			functionName: 'redeem',
-			args: [props.amount, wagmiProvider.address, wagmiProvider.address]
+			args: [props.amount, wagmiProvider.address, wagmiProvider.address, 1n] // 1n is 0.01% max_loss in BPS
 		}
 	);
 }
