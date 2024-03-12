@@ -51,7 +51,8 @@ module.exports = {
 			blue: '#6382FF',
 			pink: '#EE99FF',
 			pinkHover: '#F2B4FF',
-			yellow: '#FEBC02'
+			yellow: '#FEBC02',
+			yellowHover: '#EC9C00'
 		},
 		extend: {
 			fontFamily: {
