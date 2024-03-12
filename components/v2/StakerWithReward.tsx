@@ -18,8 +18,8 @@ import {
 import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {IconGold} from '@icons/IconGold';
 import {IconSpinner} from '@icons/IconSpinner';
-import {claimRewards, exit, stakeERC20, unstakeSome} from '@utils/actions';
-import {convertToYVToken, getVaultAPR, onInput} from '@utils/helpers';
+import {claimRewards, exit, unstakeSome, zapIn} from '@utils/actions';
+import {convertToYVToken, formatVaultAPR, onInput} from '@utils/helpers';
 import {Counter} from '@common/Counter';
 
 import type {ReactElement} from 'react';
@@ -29,29 +29,17 @@ import type {TVaultData} from '@utils/types';
 function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
 	const {address, provider} = useWeb3();
 	const [amount, set_amount] = useState<TNormalizedBN | undefined>(undefined);
+	// FIXME: decide if needed
 	const [isMax, set_isMax] = useState(false);
 	const [approveStatus, set_approveStatus] = useState(defaultTxStatus);
 	const [depositStatus, set_depositStatus] = useState(defaultTxStatus);
 
-	const actualBalanceInToken = useMemo((): TNormalizedBN => {
-		return toNormalizedBN(
-			((props.vault?.onChainData?.vaultBalanceOf?.raw || 0n) *
-				(props?.vault?.onChainData?.vaultPricePerShare.raw || 0n)) /
-				toBigInt(10 ** props.vault.decimals),
-			props.vault.decimals
-		);
-	}, [
-		props.vault?.onChainData?.vaultBalanceOf?.raw,
-		props.vault?.onChainData?.vaultPricePerShare.raw,
-		props.vault.decimals
-	]);
-
 	const {data: hasAllowance, refetch: onRefreshAllowance} = useContractRead({
 		abi: erc20ABI,
 		chainId: props.vault.chainID,
-		address: props.vault.vaultAddress,
+		address: props.vault.tokenAddress,
 		functionName: 'allowance',
-		args: [toAddress(address), props.vault.stakingAddress],
+		args: [toAddress(address), toAddress(process.env.ZAP_ADDRESS)],
 		select(data) {
 			if (isZeroAddress(address) || toBigInt(data) === 0n) {
 				return false;
@@ -67,11 +55,12 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 		assert(provider, 'provider');
 		assertAddress(props.vault.stakingAddress, 'props.vault.stakingAddress');
 		assertAddress(props.vault.vaultAddress, 'props.vault.vaultAddress');
+
 		const result = await approveERC20({
 			connector: provider,
 			chainID: props.vault.chainID,
-			contractAddress: props.vault.vaultAddress,
-			spenderAddress: props.vault.stakingAddress,
+			contractAddress: props.vault.tokenAddress,
+			spenderAddress: toAddress(process.env.ZAP_ADDRESS),
 			amount: MAX_UINT_256,
 			statusHandler: set_approveStatus,
 			shouldDisplaySuccessToast: false
@@ -86,20 +75,13 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 	}, [approveStatus.pending, provider, props, onRefreshAllowance]);
 
 	const onDeposit = useCallback(async (): Promise<void> => {
-		let actualValue = convertToYVToken(
-			amount?.raw || 0n,
-			props.vault.decimals,
-			toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
-		);
-		if (isMax) {
-			actualValue = props.vault.onChainData?.vaultBalanceOf || zeroNormalizedBN;
-		}
-
-		const result = await stakeERC20({
+		const result = await zapIn({
 			connector: provider,
 			chainID: props.vault.chainID,
-			amount: toBigInt(actualValue?.raw),
-			contractAddress: props.vault.stakingAddress,
+			amount: toBigInt(amount?.raw),
+			vaultAddress: props.vault.vaultAddress,
+			contractAddress: toAddress(process.env.ZAP_ADDRESS),
+			shouldDisplaySuccessToast: false,
 			statusHandler: set_depositStatus
 		});
 		if (result.isSuccessful) {
@@ -108,7 +90,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 			set_amount(undefined);
 			toast.success(`You are now staking ${amount?.normalized} ${props.vault.tokenSymbol}. Enjoy your rewards!`);
 		}
-	}, [amount?.raw, amount?.normalized, isMax, provider, props, onRefreshAllowance]);
+	}, [amount?.raw, amount?.normalized, provider, props, onRefreshAllowance]);
 
 	function renderApproveButton(): ReactElement {
 		return (
@@ -117,12 +99,12 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				disabled={
 					!provider ||
 					toBigInt(amount?.raw) === 0n ||
-					toBigInt(amount?.raw) > toBigInt(actualBalanceInToken?.raw || 0n)
+					toBigInt(amount?.raw) > toBigInt(props.vault?.onChainData?.tokenBalanceOf?.raw || 0n)
 				}
 				className={cl(
 					'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 					'focus:ring-transparent focus:!border-neutral-600',
-					'disabled:bg-neutral-300 bg-yellow',
+					'disabled:bg-neutral-300 bg-orange',
 					'border-neutral-600',
 					'disabled:cursor-not-allowed',
 					'disabled:text-neutral-400 text-neutral-900'
@@ -146,7 +128,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				disabled={
 					!provider ||
 					toBigInt(amount?.raw) === 0n ||
-					toBigInt(amount?.raw) > toBigInt(actualBalanceInToken?.raw || 0n)
+					toBigInt(amount?.raw) > toBigInt(props.vault?.onChainData?.tokenBalanceOf?.raw || 0n)
 				}
 				className={cl(
 					'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
@@ -184,20 +166,22 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 					value={amount === undefined ? '' : amount.normalized}
 					onChange={e => {
 						set_isMax(false);
-						set_amount(onInput(e, props.vault.decimals, actualBalanceInToken));
+						set_amount(onInput(e, props.vault.decimals, props.vault?.onChainData?.tokenBalanceOf));
 					}}
 				/>
 				{hasAllowance ? renderStakeButton() : renderApproveButton()}
 			</div>
 			<button
 				suppressHydrationWarning
-				disabled={!actualBalanceInToken || actualBalanceInToken.raw === 0n}
+				disabled={
+					!props.vault?.onChainData?.tokenBalanceOf || props.vault?.onChainData?.tokenBalanceOf.raw === 0n
+				}
 				onClick={() => {
-					set_amount(actualBalanceInToken || zeroNormalizedBN);
+					set_amount(props.vault?.onChainData?.tokenBalanceOf || zeroNormalizedBN);
 					set_isMax(true);
 				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`${formatAmount(actualBalanceInToken?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to stake`}
+				{`You have ${formatAmount(props.vault?.onChainData?.tokenBalanceOf?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
 			</button>
 		</div>
 	);
@@ -298,7 +282,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 					set_isMax(true);
 				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`${formatAmount(actualBalanceInTokenForStaking?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to unstake`}
+				{`You have ${formatAmount(actualBalanceInTokenForStaking?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
 			</button>
 		</div>
 	);
@@ -308,6 +292,8 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 	const {provider} = useWeb3();
 	const [claimStatus, set_claimStatus] = useState(defaultTxStatus);
 	const [exitStatus, set_exitStatus] = useState(defaultTxStatus);
+
+	console.log('!!!', props?.vault?.onChainData);
 
 	const onClaim = useCallback(async (): Promise<void> => {
 		const result = await claimRewards({
@@ -440,9 +426,9 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 				<b
 					suppressHydrationWarning
 					className={'block pb-2 text-neutral-900'}>
-					{`Extra ${props.vault.rewardSymbol}: `}
-					{getVaultAPR(props?.vault?.yDaemonData)}
-					{' +'}
+					{'Rewards: '}
+					{formatVaultAPR(props?.vault?.yDaemonData)}
+					{' APR +'}
 				</b>
 				<b
 					suppressHydrationWarning
@@ -491,7 +477,7 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 						suppressHydrationWarning
 						className={'block text-sm text-neutral-900'}>
 						{`Extra ${props.vault.rewardSymbol}: `}
-						{getVaultAPR(props?.vault?.yDaemonData)}
+						{formatVaultAPR(props?.vault?.yDaemonData)}
 						{' +'}
 					</p>
 					<b
@@ -541,7 +527,7 @@ export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: 
 					)}>
 					<IconGold className={'size-8'} />
 				</div>
-				<h3 className={'text-lg font-bold uppercase'}>{'Auto compounding'}</h3>
+				<h3 className={'text-lg font-bold uppercase'}>{'Manual claim'}</h3>
 			</header>
 			<main className={'flex flex-col gap-6'}>
 				<DesktopStats {...props} />
