@@ -32,7 +32,7 @@ export async function redeemV3Shares(props: TRedeemV3Shares): Promise<TTxRespons
 			abi: YVAULT_V3_ABI,
 			functionName: 'redeem',
 			args: [props.amount, wagmiProvider.address, wagmiProvider.address, 1n], // 1n is 0.01% max_loss in BPS
-			confirmation: 1
+			confirmation: 2
 		}
 	);
 }
@@ -61,7 +61,7 @@ export async function depositERC20(props: TDepositERC20Args): Promise<TTxRespons
 			abi: YVAULT_V3_ABI,
 			functionName: 'deposit',
 			args: [props.amount, wagmiProvider.address],
-			confirmation: 1
+			confirmation: 2
 		}
 	);
 }
@@ -88,7 +88,7 @@ export async function stakeERC20(props: TStakeERC20Args): Promise<TTxResponse> {
 			abi: YVAULT_STAKING_ABI,
 			functionName: 'stake',
 			args: [props.amount],
-			confirmation: 1
+			confirmation: 2
 		}
 	);
 }
@@ -110,7 +110,7 @@ export async function exit(props: TExit): Promise<TTxResponse> {
 			address: props.contractAddress,
 			abi: YVAULT_STAKING_ABI,
 			functionName: 'exit',
-			confirmation: 1
+			confirmation: 2
 		}
 	);
 }
@@ -136,7 +136,7 @@ export async function unstakeSome(props: TUnstake): Promise<TTxResponse> {
 			abi: YVAULT_STAKING_ABI,
 			functionName: 'withdraw',
 			args: [props.amount],
-			confirmation: 1
+			confirmation: 2
 		}
 	);
 }
@@ -158,7 +158,7 @@ export async function claimRewards(props: TClaimRewards): Promise<TTxResponse> {
 			address: props.contractAddress,
 			abi: YVAULT_STAKING_ABI,
 			functionName: 'getReward',
-			confirmation: 1
+			confirmation: 2
 		}
 	);
 }
@@ -183,7 +183,7 @@ export async function zapIn(props: TZapIn): Promise<TTxResponse> {
 		address: props.contractAddress,
 		abi: ZAP_ABI,
 		functionName: 'zapIn',
-		confirmation: 1,
+		confirmation: 2,
 		args: [props.vaultAddress, props.amount]
 	});
 }
@@ -209,7 +209,7 @@ export async function zapOut(props: TZapOut): Promise<TTxResponse> {
 		address: props.contractAddress,
 		abi: ZAP_ABI,
 		functionName: 'zapOut',
-		confirmation: 1,
+		confirmation: 2,
 		args: [props.vaultAddress, props.amount, props.exit]
 	});
 }

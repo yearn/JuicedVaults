@@ -104,7 +104,7 @@ function Home(): ReactElement {
 					}
 				/>
 				<div className={'mx-auto w-full max-w-6xl items-center'}>
-					<HeaderTitle className={'relative z-20 w-full md:h-[460px] md:w-[628px]'} />
+					<HeaderTitle className={'relative z-10 w-full md:h-[460px] md:w-[628px]'} />
 				</div>
 			</div>
 

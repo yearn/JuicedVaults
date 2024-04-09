@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Toaster} from 'react-hot-toast';
 import localFont from 'next/font/local';
 import Head from 'next/head';
 import {gnosis, mainnet, polygon} from 'viem/chains';
 import {WalletContextApp} from '@builtbymom/web3/contexts/useWallet';
 import {WithMom} from '@builtbymom/web3/contexts/WithMom';
+import {cl} from '@builtbymom/web3/utils';
 import {localhost} from '@builtbymom/web3/utils/wagmi/networks';
 import IconCheck from '@icons/IconCheck';
 import IconCircleCross from '@icons/IconCircleCross';
@@ -34,6 +35,39 @@ const aeonik = localFont({
 });
 
 function MyApp({Component, ...props}: AppProps): ReactElement {
+	const [sticky, set_sticky] = useState({isSticky: false, offset: 0});
+	const headerRef = useRef<HTMLDivElement>(null);
+
+	// handle scroll event
+	const handleScroll = (elTopOffset: number, elHeight: number): void => {
+		if (window.scrollY > elTopOffset + elHeight) {
+			set_sticky({isSticky: true, offset: elHeight});
+		} else {
+			set_sticky({isSticky: false, offset: 0});
+		}
+	};
+
+	// add/remove scroll event listener
+	useEffect(() => {
+		if (!headerRef.current) {
+			return;
+		}
+
+		const header = headerRef.current.getBoundingClientRect();
+
+		console.log('header', header, header.top, header.height);
+
+		const handleScrollEvent = (): void => {
+			handleScroll(header.top, header.height);
+		};
+
+		window.addEventListener('scroll', handleScrollEvent);
+
+		return () => {
+			window.removeEventListener('scroll', handleScrollEvent);
+		};
+	}, []);
+
 	return (
 		<>
 			<Head>
@@ -61,7 +95,9 @@ function MyApp({Component, ...props}: AppProps): ReactElement {
 				]}>
 				<WalletContextApp>
 					<div className={'${aeonik.variable} mx-auto flex size-full h-screen flex-col'}>
-						<div className={'bg-orange'}>
+						<div
+							className={cl('bg-orange', sticky.isSticky ? ' sticky-header' : '')}
+							ref={headerRef}>
 							<Header />
 						</div>
 						<main className={'relative flex h-full flex-col justify-between'}>
