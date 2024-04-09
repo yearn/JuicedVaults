@@ -228,8 +228,7 @@ export function VaultV2(props: {
 		if (isNumber(apr)) {
 			registerNewVault({
 				vaultAddress: vault.vaultAddress,
-				autoCompoundingDeposit,
-				rewardsDeposit,
+				totalDeposit: autoCompoundingDeposit + rewardsDeposit,
 				apr,
 				tvl: autoCompoundTvl + rewardTvl,
 				rewardsValue,

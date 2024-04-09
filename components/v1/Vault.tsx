@@ -182,11 +182,13 @@ export function VaultV1(props: {
 
 		const autoCoumpoundingVaultSupply = toNormalizedBN(decodeAsBigInt(onChainData[7]), vault.decimals);
 
+		const vaultBalanceOf = isZeroAddress(address)
+			? zeroNormalizedBN
+			: toNormalizedBN(decodeAsBigInt(onChainData[1]), vault.decimals);
+
 		set_onChainVault({
 			totalVaultSupply: toNormalizedBN(decodeAsBigInt(onChainData[0]), vault.decimals),
-			vaultBalanceOf: isZeroAddress(address)
-				? zeroNormalizedBN
-				: toNormalizedBN(decodeAsBigInt(onChainData[1]), vault.decimals),
+			vaultBalanceOf,
 			tokenBalanceOf: isZeroAddress(address)
 				? zeroNormalizedBN
 				: toNormalizedBN(decodeAsBigInt(onChainData[2]), vault.decimals),
@@ -211,6 +213,8 @@ export function VaultV1(props: {
 
 		const rewardsDeposit = (stakingBalanceOf?.normalized || 0) * (vaultPricePerShare.normalized || 0);
 
+		const vaultDeposit = (vaultBalanceOf?.normalized || 0) * (vaultPricePerShare.normalized || 0);
+
 		const autoCompoundTvl =
 			(autoCoumpoundingVaultSupply?.normalized || 0) * (pricesForVault?.vaultToken.normalized || 0);
 		const rewardTvl = (rewardContractTotalSupply?.normalized || 0) * (pricesForVault?.vaultToken.normalized || 0);
@@ -222,8 +226,7 @@ export function VaultV1(props: {
 		if (isNumber(apr)) {
 			registerNewVault({
 				vaultAddress: vault.vaultAddress,
-				autoCompoundingDeposit,
-				rewardsDeposit,
+				totalDeposit: vaultDeposit + rewardsDeposit + autoCompoundingDeposit,
 				apr,
 				tvl: autoCompoundTvl + rewardTvl,
 				rewardsValue,

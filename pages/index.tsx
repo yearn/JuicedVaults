@@ -81,8 +81,8 @@ function Home(): ReactElement {
 			const vaultAData = vaultsData[a.vaultAddress];
 			const vaultBData = vaultsData[b.vaultAddress];
 
-			const aDeposited = vaultAData.autoCompoundingDeposit + vaultAData.rewardsDeposit || 0;
-			const bDeposited = vaultBData.autoCompoundingDeposit + vaultBData.rewardsDeposit || 0;
+			const aDeposited = vaultAData.totalDeposit || 0;
+			const bDeposited = vaultBData.totalDeposit || 0;
 
 			return bDeposited - aDeposited || vaultBData.apr - vaultAData.apr;
 		});

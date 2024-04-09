@@ -44,8 +44,7 @@ export type TVaultData = TVaultListItem & {
 };
 
 export type TVault = {
-	autoCompoundingDeposit: number;
-	rewardsDeposit: number;
+	totalDeposit: number;
 	vaultAddress: TAddress;
 	isFetched: boolean;
 	apr: number;
