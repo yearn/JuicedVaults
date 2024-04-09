@@ -55,8 +55,6 @@ function MyApp({Component, ...props}: AppProps): ReactElement {
 
 		const header = headerRef.current.getBoundingClientRect();
 
-		console.log('header', header, header.top, header.height);
-
 		const handleScrollEvent = (): void => {
 			handleScroll(header.top, header.height);
 		};
@@ -94,9 +92,14 @@ function MyApp({Component, ...props}: AppProps): ReactElement {
 					'https://raw.githubusercontent.com/SmolDapp/tokenLists/main/lists/ajna.json'
 				]}>
 				<WalletContextApp>
-					<div className={'${aeonik.variable} mx-auto flex size-full h-screen flex-col'}>
+					<div
+						className={'${aeonik.variable} mx-auto flex size-full h-screen flex-col'}
+						style={{marginTop: sticky.offset}}>
 						<div
-							className={cl('bg-orange', sticky.isSticky ? ' sticky-header' : '')}
+							className={cl(
+								'bg-orange',
+								sticky.isSticky ? ' sticky-header border-b-4 border-neutral-900' : ''
+							)}
 							ref={headerRef}>
 							<Header />
 						</div>
