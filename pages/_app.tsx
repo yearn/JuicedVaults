@@ -2,12 +2,12 @@ import React, {Fragment} from 'react';
 import {Toaster} from 'react-hot-toast';
 import localFont from 'next/font/local';
 import Head from 'next/head';
-import {mainnet, polygon} from 'viem/chains';
+import {gnosis, mainnet, polygon} from 'viem/chains';
 import {WalletContextApp} from '@builtbymom/web3/contexts/useWallet';
 import {WithMom} from '@builtbymom/web3/contexts/WithMom';
+import {localhost} from '@builtbymom/web3/utils/wagmi/networks';
 import IconCheck from '@icons/IconCheck';
 import IconCircleCross from '@icons/IconCircleCross';
-import {localhost} from '@yearn-finance/web-lib/utils/wagmi/networks';
 import Meta from '@common/Meta';
 
 import type {AppProps} from 'next/app';
@@ -53,7 +53,7 @@ function MyApp({Component, ...props}: AppProps): ReactElement {
 			</Head>
 			<Meta />
 			<WithMom
-				supportedChains={[mainnet, polygon, localhost]}
+				supportedChains={[mainnet, polygon, gnosis, localhost]}
 				tokenLists={[
 					'https://raw.githubusercontent.com/SmolDapp/tokenLists/main/lists/yearn.json',
 					'https://raw.githubusercontent.com/SmolDapp/tokenLists/main/lists/ajna.json'

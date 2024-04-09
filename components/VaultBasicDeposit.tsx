@@ -1,6 +1,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import {toast} from 'react-hot-toast';
-import {erc20ABI, useContractRead} from 'wagmi';
+import {useReadContract} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {
 	assert,
@@ -19,6 +19,7 @@ import {approveERC20, defaultTxStatus, getNetwork} from '@builtbymom/web3/utils/
 import {IconSpinner} from '@icons/IconSpinner';
 import {depositERC20, redeemV3Shares} from '@utils/actions';
 import {convertToYVToken, getVaultAPR, onInput, toSafeChainID} from '@utils/helpers';
+import {erc20ABI} from '@wagmi/core';
 import {ImageWithFallback} from '@common/ImageWithFallback';
 
 import type {ReactElement} from 'react';
@@ -31,17 +32,19 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 	const [approveStatus, set_approveStatus] = useState(defaultTxStatus);
 	const [depositStatus, set_depositStatus] = useState(defaultTxStatus);
 
-	const {data: hasAllowance, refetch: onRefreshAllowance} = useContractRead({
+	const {data: hasAllowance, refetch: onRefreshAllowance} = useReadContract({
 		abi: erc20ABI,
 		chainId: props.vault.chainID,
 		address: props.vault.tokenAddress,
 		functionName: 'allowance',
 		args: [toAddress(address), props.vault.vaultAddress],
-		select(data) {
-			if (isZeroAddress(address) || toBigInt(data) === 0n) {
-				return false;
+		query: {
+			select(data) {
+				if (isZeroAddress(address) || toBigInt(data) === 0n) {
+					return false;
+				}
+				return toBigInt(data) >= toBigInt(amount?.raw);
 			}
-			return toBigInt(data) >= toBigInt(amount?.raw);
 		}
 	});
 

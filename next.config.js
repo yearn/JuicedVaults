@@ -50,6 +50,7 @@ module.exports = phase =>
 			JSON_RPC_URL: {
 				1: process.env.RPC_URL_MAINNET,
 				10: process.env.RPC_URL_OPTIMISM,
+				100: process.env.RPC_URL_GNOSIS,
 				137: process.env.RPC_URL_POLYGON,
 				250: process.env.RPC_URL_FANTOM,
 				1337: 'http://localhost:8080',

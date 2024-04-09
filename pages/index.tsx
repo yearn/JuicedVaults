@@ -3,7 +3,7 @@ import Image from 'next/image';
 import {HeaderTitle} from 'components/HeaderTitle';
 import {VaultBasicDeposit} from 'components/VaultBasicDeposit';
 import {VaultChoiceWrapper} from 'components/VaultChoiceWrapper';
-import {erc20ABI, useContractReads} from 'wagmi';
+import {useReadContracts} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useFetch} from '@builtbymom/web3/hooks/useFetch';
 import {
@@ -22,8 +22,9 @@ import {YVAULT_STAKING_ABI} from '@utils/abi/yVaultStaking.abi';
 import {YVAULT_V3_ABI} from '@utils/abi/yVaultV3.abi';
 import {toSafeChainID} from '@utils/helpers';
 import {VAULT_LIST} from '@utils/vaultList';
+import {erc20ABI} from '@wagmi/core';
+import {useFetchYearnPrices} from '@yearn-finance/web-lib/hooks/useFetchYearnPrices';
 import {useYDaemonBaseURI} from '@yearn-finance/web-lib/hooks/useYDaemonBaseURI';
-import {useYearnPrices} from '@yearn-finance/web-lib/hooks/useYearnPrices';
 import {yDaemonVaultSchema} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
 
 import type {ReactElement} from 'react';
@@ -66,9 +67,10 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 		schema: yDaemonVaultSchema
 	});
 
-	const {data: onChainData, refetch: onRefreshVaultData} = useContractReads({
-		watch: true,
-		enabled: nonce % 2 === 0,
+	const {data: onChainData, refetch: onRefreshVaultData} = useReadContracts({
+		query: {
+			enabled: nonce % 2 === 0
+		},
 		contracts: [
 			//Primary vault info
 			{
@@ -267,7 +269,7 @@ function VaultList(props: {vault: TVaultListItem; prices: TYDaemonPricesChain}):
 }
 
 function Home(): ReactElement {
-	const prices = useYearnPrices();
+	const prices = useFetchYearnPrices();
 
 	return (
 		<div>

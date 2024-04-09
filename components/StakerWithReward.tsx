@@ -1,6 +1,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import toast from 'react-hot-toast';
-import {erc20ABI, useContractRead} from 'wagmi';
+import {useReadContract} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {
 	assert,
@@ -20,6 +20,7 @@ import {IconBigChevron} from '@icons/IconBigChevron';
 import {IconSpinner} from '@icons/IconSpinner';
 import {claimRewards, exit, stakeERC20, unstakeSome} from '@utils/actions';
 import {convertToYVToken, getVaultAPR, onInput} from '@utils/helpers';
+import {erc20ABI} from '@wagmi/core';
 import {Counter} from '@common/Counter';
 
 import type {ReactElement} from 'react';
@@ -46,17 +47,19 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 		props.vault.decimals
 	]);
 
-	const {data: hasAllowance, refetch: onRefreshAllowance} = useContractRead({
+	const {data: hasAllowance, refetch: onRefreshAllowance} = useReadContract({
 		abi: erc20ABI,
 		chainId: props.vault.chainID,
 		address: props.vault.vaultAddress,
 		functionName: 'allowance',
 		args: [toAddress(address), props.vault.stakingAddress],
-		select(data) {
-			if (isZeroAddress(address) || toBigInt(data) === 0n) {
-				return false;
+		query: {
+			select(data) {
+				if (isZeroAddress(address) || toBigInt(data) === 0n) {
+					return false;
+				}
+				return toBigInt(data) >= toBigInt(amount?.raw);
 			}
-			return toBigInt(data) >= toBigInt(amount?.raw);
 		}
 	});
 

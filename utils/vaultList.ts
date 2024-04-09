@@ -4,6 +4,18 @@ import type {TVaultListItem} from './types';
 
 export const VAULT_LIST: TVaultListItem[] = [
 	{
+		name: 'yvAjnaEURe',
+		tokenSymbol: 'EURe',
+		rewardSymbol: 'AJNA',
+		decimals: 18,
+		chainID: 100,
+		vaultAddress: toAddress('0x39B68451F05Aaa020611CF887a7338f0991fFd60'), //yvAjnaEURe
+		tokenAddress: toAddress('0xcB444e90D8198415266c6a2724b7900fb12FC56E'), //EURe
+		autoCompoundingAddress: toAddress('0x861d6dbd673694478ad0CD28BE45073f60da9494'), //ysyvAjnaEURe
+		stakingAddress: toAddress('0xd4263aBDdD2afdaAE0A0a69Eb09Deb8000dd642e'), //stakedEURe
+		rewardAddress: toAddress('0x67Ee2155601e168F7777F169Cd74f3E22BB5E0cE') //Ajna
+	},
+	{
 		name: 'yvAjnaWETH',
 		tokenSymbol: 'WETH',
 		rewardSymbol: 'AJNA',
