@@ -50,6 +50,7 @@ module.exports = phase =>
 			JSON_RPC_URL: {
 				1: process.env.RPC_URL_MAINNET,
 				10: process.env.RPC_URL_OPTIMISM,
+				100: process.env.RPC_URL_GNOSIS,
 				137: process.env.RPC_URL_POLYGON,
 				250: process.env.RPC_URL_FANTOM,
 				1337: 'http://localhost:8080',
@@ -61,6 +62,7 @@ module.exports = phase =>
 			RPC_URL_OPTIMISM_YEARN: process.env.RPC_URL_OPTIMISM_YEARN,
 			WALLETCONNECT_PROJECT_ID: process.env.WALLETCONNECT_PROJECT_ID,
 			SMOL_ASSETS_URL: 'https://assets.smold.app/api',
-			DEFAULT_CHAIN_ID: 1
+			DEFAULT_CHAIN_ID: 1,
+			ZAP_ADDRESS: '0x37F350DC357222E823620d473d0289C12e1AcCDC'
 		}
 	});

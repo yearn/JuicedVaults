@@ -1,6 +1,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import {toast} from 'react-hot-toast';
-import {erc20ABI, useContractRead} from 'wagmi';
+import {useReadContract} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {
 	assert,
@@ -18,7 +18,8 @@ import {
 import {approveERC20, defaultTxStatus, getNetwork} from '@builtbymom/web3/utils/wagmi';
 import {IconSpinner} from '@icons/IconSpinner';
 import {depositERC20, redeemV3Shares} from '@utils/actions';
-import {convertToYVToken, getVaultAPR, onInput, toSafeChainID} from '@utils/helpers';
+import {convertToYVToken, formatVaultAPR, onInput, toSafeChainID} from '@utils/helpers';
+import {erc20ABI} from '@wagmi/core';
 import {ImageWithFallback} from '@common/ImageWithFallback';
 
 import type {ReactElement} from 'react';
@@ -31,17 +32,19 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 	const [approveStatus, set_approveStatus] = useState(defaultTxStatus);
 	const [depositStatus, set_depositStatus] = useState(defaultTxStatus);
 
-	const {data: hasAllowance, refetch: onRefreshAllowance} = useContractRead({
+	const {data: hasAllowance, refetch: onRefreshAllowance} = useReadContract({
 		abi: erc20ABI,
 		chainId: props.vault.chainID,
 		address: props.vault.tokenAddress,
 		functionName: 'allowance',
 		args: [toAddress(address), props.vault.vaultAddress],
-		select(data) {
-			if (isZeroAddress(address) || toBigInt(data) === 0n) {
-				return false;
+		query: {
+			select(data) {
+				if (isZeroAddress(address) || toBigInt(data) === 0n) {
+					return false;
+				}
+				return toBigInt(data) >= toBigInt(amount?.raw);
 			}
-			return toBigInt(data) >= toBigInt(amount?.raw);
 		}
 	});
 
@@ -310,7 +313,7 @@ export function DesktopStats(props: {vault: TVaultData}): ReactElement {
 				<b
 					suppressHydrationWarning
 					className={'block text-3xl text-beige'}>
-					{getVaultAPR(props?.vault?.yDaemonData)}
+					{formatVaultAPR(props?.vault?.yDaemonData)}
 				</b>
 			</div>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4 leading-4'}>
@@ -360,7 +363,7 @@ export function MobileStats(props: {vault: TVaultData}): ReactElement {
 					<b
 						className={'block text-beige'}
 						suppressHydrationWarning>
-						{getVaultAPR(props?.vault?.yDaemonData)}
+						{formatVaultAPR(props?.vault?.yDaemonData)}
 					</b>
 				</div>
 				<div className={'flex items-center justify-between'}>
@@ -395,7 +398,7 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 	const blockExplorer = getNetwork(props.vault.chainID).blockExplorers?.etherscan?.url;
 
 	return (
-		<div className={'relative flex flex-col p-4 md:p-8'}>
+		<div className={'relative flex flex-col'}>
 			<div className={'flex flex-row items-center space-x-4 pb-6 pt-4 md:pb-[42px]'}>
 				<ImageWithFallback
 					alt={props.vault.tokenSymbol}

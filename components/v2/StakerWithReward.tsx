@@ -1,6 +1,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import toast from 'react-hot-toast';
-import {erc20ABI, useContractRead} from 'wagmi';
+import {useReadContract} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {
 	assert,
@@ -16,10 +16,11 @@ import {
 	zeroNormalizedBN
 } from '@builtbymom/web3/utils';
 import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
-import {IconBigChevron} from '@icons/IconBigChevron';
+import {IconGold} from '@icons/IconGold';
 import {IconSpinner} from '@icons/IconSpinner';
-import {claimRewards, exit, stakeERC20, unstakeSome} from '@utils/actions';
-import {convertToYVToken, getVaultAPR, onInput} from '@utils/helpers';
+import {claimRewards, exit, unstakeSome, zapIn} from '@utils/actions';
+import {convertToYVToken, formatVaultAPR, onInput} from '@utils/helpers';
+import {erc20ABI} from '@wagmi/core';
 import {Counter} from '@common/Counter';
 
 import type {ReactElement} from 'react';
@@ -29,34 +30,25 @@ import type {TVaultData} from '@utils/types';
 function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
 	const {address, provider} = useWeb3();
 	const [amount, set_amount] = useState<TNormalizedBN | undefined>(undefined);
-	const [isMax, set_isMax] = useState(false);
+	// FIXME: decide if needed
+	// eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
+	const [_isMax, set_isMax] = useState(false);
 	const [approveStatus, set_approveStatus] = useState(defaultTxStatus);
 	const [depositStatus, set_depositStatus] = useState(defaultTxStatus);
 
-	const actualBalanceInToken = useMemo((): TNormalizedBN => {
-		return toNormalizedBN(
-			((props.vault?.onChainData?.vaultBalanceOf?.raw || 0n) *
-				(props?.vault?.onChainData?.vaultPricePerShare.raw || 0n)) /
-				toBigInt(10 ** props.vault.decimals),
-			props.vault.decimals
-		);
-	}, [
-		props.vault?.onChainData?.vaultBalanceOf?.raw,
-		props.vault?.onChainData?.vaultPricePerShare.raw,
-		props.vault.decimals
-	]);
-
-	const {data: hasAllowance, refetch: onRefreshAllowance} = useContractRead({
+	const {data: hasAllowance, refetch: onRefreshAllowance} = useReadContract({
 		abi: erc20ABI,
 		chainId: props.vault.chainID,
-		address: props.vault.vaultAddress,
+		address: props.vault.tokenAddress,
 		functionName: 'allowance',
-		args: [toAddress(address), props.vault.stakingAddress],
-		select(data) {
-			if (isZeroAddress(address) || toBigInt(data) === 0n) {
-				return false;
+		args: [toAddress(address), toAddress(process.env.ZAP_ADDRESS)],
+		query: {
+			select(data) {
+				if (isZeroAddress(address) || toBigInt(data) === 0n) {
+					return false;
+				}
+				return toBigInt(data) >= toBigInt(amount?.raw);
 			}
-			return toBigInt(data) >= toBigInt(amount?.raw);
 		}
 	});
 
@@ -67,11 +59,12 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 		assert(provider, 'provider');
 		assertAddress(props.vault.stakingAddress, 'props.vault.stakingAddress');
 		assertAddress(props.vault.vaultAddress, 'props.vault.vaultAddress');
+
 		const result = await approveERC20({
 			connector: provider,
 			chainID: props.vault.chainID,
-			contractAddress: props.vault.vaultAddress,
-			spenderAddress: props.vault.stakingAddress,
+			contractAddress: props.vault.tokenAddress,
+			spenderAddress: toAddress(process.env.ZAP_ADDRESS),
 			amount: MAX_UINT_256,
 			statusHandler: set_approveStatus,
 			shouldDisplaySuccessToast: false
@@ -86,20 +79,13 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 	}, [approveStatus.pending, provider, props, onRefreshAllowance]);
 
 	const onDeposit = useCallback(async (): Promise<void> => {
-		let actualValue = convertToYVToken(
-			amount?.raw || 0n,
-			props.vault.decimals,
-			toBigInt(props.vault.onChainData?.vaultPricePerShare.raw)
-		);
-		if (isMax) {
-			actualValue = props.vault.onChainData?.vaultBalanceOf || zeroNormalizedBN;
-		}
-
-		const result = await stakeERC20({
+		const result = await zapIn({
 			connector: provider,
 			chainID: props.vault.chainID,
-			amount: toBigInt(actualValue?.raw),
-			contractAddress: props.vault.stakingAddress,
+			amount: toBigInt(amount?.raw),
+			vaultAddress: props.vault.vaultAddress,
+			contractAddress: toAddress(process.env.ZAP_ADDRESS),
+			shouldDisplaySuccessToast: false,
 			statusHandler: set_depositStatus
 		});
 		if (result.isSuccessful) {
@@ -108,7 +94,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 			set_amount(undefined);
 			toast.success(`You are now staking ${amount?.normalized} ${props.vault.tokenSymbol}. Enjoy your rewards!`);
 		}
-	}, [amount?.raw, amount?.normalized, isMax, provider, props, onRefreshAllowance]);
+	}, [amount?.raw, amount?.normalized, provider, props, onRefreshAllowance]);
 
 	function renderApproveButton(): ReactElement {
 		return (
@@ -117,12 +103,12 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				disabled={
 					!provider ||
 					toBigInt(amount?.raw) === 0n ||
-					toBigInt(amount?.raw) > toBigInt(actualBalanceInToken?.raw || 0n)
+					toBigInt(amount?.raw) > toBigInt(props.vault?.onChainData?.tokenBalanceOf?.raw || 0n)
 				}
 				className={cl(
 					'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 					'focus:ring-transparent focus:!border-neutral-600',
-					'disabled:bg-neutral-300 bg-yellow',
+					'disabled:bg-neutral-300 bg-orange',
 					'border-neutral-600',
 					'disabled:cursor-not-allowed',
 					'disabled:text-neutral-400 text-neutral-900'
@@ -146,12 +132,12 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 				disabled={
 					!provider ||
 					toBigInt(amount?.raw) === 0n ||
-					toBigInt(amount?.raw) > toBigInt(actualBalanceInToken?.raw || 0n)
+					toBigInt(amount?.raw) > toBigInt(props.vault?.onChainData?.tokenBalanceOf?.raw || 0n)
 				}
 				className={cl(
 					'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 					'focus:ring-transparent focus:!border-neutral-600',
-					'disabled:bg-neutral-300 bg-yellow',
+					'disabled:bg-neutral-300 bg-orange',
 					'border-neutral-600',
 					'disabled:cursor-not-allowed',
 					'disabled:text-neutral-400 text-neutral-900'
@@ -163,19 +149,19 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 					)}>
 					<IconSpinner className={'text-neutral-900'} />
 				</div>
-				<p className={depositStatus.pending ? 'opacity-0' : 'opacity-100'}>{'Stake'}</p>
+				<p className={depositStatus.pending ? 'opacity-0' : 'opacity-100'}>{'Deposit'}</p>
 			</button>
 		);
 	}
 
 	return (
-		<div className={'pt-6'}>
-			<b className={'mb-2 block'}>{'Stake'}</b>
+		<div>
+			<b className={'mb-2 block'}>{'Deposit'}</b>
 			<div className={'flex flex-col gap-2 md:flex-row'}>
 				<input
 					className={cl(
 						'h-10 w-full overflow-x-scroll rounded-lg px-2 py-4 font-bold outline-none scrollbar-none',
-						'border-2 border-neutral-900 bg-neutral-0 font-normal font-number'
+						'border-2 border-neutral-900 bg-beige font-normal font-number'
 					)}
 					placeholder={'0.00'}
 					type={'number'}
@@ -184,20 +170,22 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 					value={amount === undefined ? '' : amount.normalized}
 					onChange={e => {
 						set_isMax(false);
-						set_amount(onInput(e, props.vault.decimals, actualBalanceInToken));
+						set_amount(onInput(e, props.vault.decimals, props.vault?.onChainData?.tokenBalanceOf));
 					}}
 				/>
 				{hasAllowance ? renderStakeButton() : renderApproveButton()}
 			</div>
 			<button
 				suppressHydrationWarning
-				disabled={!actualBalanceInToken || actualBalanceInToken.raw === 0n}
+				disabled={
+					!props.vault?.onChainData?.tokenBalanceOf || props.vault?.onChainData?.tokenBalanceOf.raw === 0n
+				}
 				onClick={() => {
-					set_amount(actualBalanceInToken || zeroNormalizedBN);
+					set_amount(props.vault?.onChainData?.tokenBalanceOf || zeroNormalizedBN);
 					set_isMax(true);
 				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`${formatAmount(actualBalanceInToken?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to stake`}
+				{`You have ${formatAmount(props.vault?.onChainData?.tokenBalanceOf?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
 			</button>
 		</div>
 	);
@@ -245,13 +233,13 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 	}, [amount?.raw, isMax, provider, props]);
 
 	return (
-		<div className={'pt-6'}>
-			<b className={'mb-2 block'}>{'Unstake'}</b>
+		<div>
+			<b className={'mb-2 block'}>{'Withdraw'}</b>
 			<div className={'flex flex-col gap-2 md:flex-row'}>
 				<input
 					className={cl(
 						'h-10 w-full overflow-x-scroll rounded-lg px-2 py-4 font-bold outline-none scrollbar-none',
-						'border-2 border-neutral-900 bg-neutral-0 font-normal font-number'
+						'border-2 border-neutral-900 bg-beige font-normal font-number'
 					)}
 					placeholder={'0.00'}
 					type={'number'}
@@ -273,7 +261,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 					className={cl(
 						'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 						'focus:ring-transparent focus:!border-neutral-600',
-						'disabled:bg-neutral-300 bg-yellow',
+						'disabled:bg-neutral-300 bg-orange',
 						'border-neutral-600',
 						'disabled:cursor-not-allowed',
 						'disabled:text-neutral-400 text-neutral-900'
@@ -285,7 +273,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 						)}>
 						<IconSpinner className={'text-neutral-900'} />
 					</div>
-					<p className={withdrawStatus.pending ? 'opacity-0' : 'opacity-100'}>{'Unstake'}</p>
+					<p className={withdrawStatus.pending ? 'opacity-0' : 'opacity-100'}>{'Withdraw'}</p>
 				</button>
 			</div>
 			<button
@@ -298,7 +286,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 					set_isMax(true);
 				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`${formatAmount(actualBalanceInTokenForStaking?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to unstake`}
+				{`You have ${formatAmount(actualBalanceInTokenForStaking?.normalized || 0, 4)} ${props.vault.tokenSymbol}`}
 			</button>
 		</div>
 	);
@@ -340,14 +328,14 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 	}, [provider, props]);
 
 	return (
-		<div className={'pt-6'}>
+		<div>
 			<b className={'mb-2 block'}>{'Claim rewards'}</b>
 			<div className={'flex flex-col gap-2 md:flex-row'}>
 				<div
 					className={cl(
 						'h-10 w-full overflow-x-scroll rounded-lg px-2 outline-none scrollbar-none',
 						'leading-10 overflow-hidden',
-						'border-2 border-neutral-900 bg-neutral-0 font-number font-normal tabular-nums'
+						'border-2 border-neutral-900 bg-beige font-number font-normal tabular-nums'
 					)}>
 					{props?.vault?.onChainData?.rewardEarned?.raw === 0n ? (
 						<p className={'font-number font-normal text-neutral-400'}>{formatAmount(0)}</p>
@@ -371,7 +359,7 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 						className={cl(
 							'h-10 min-w-[128px] rounded-lg border-2 text-base font-bold relative',
 							'focus:ring-transparent focus:!border-neutral-600',
-							'disabled:bg-neutral-300 bg-yellow',
+							'disabled:bg-neutral-300 bg-orange',
 							'border-neutral-600',
 							'disabled:cursor-not-allowed',
 							'disabled:text-neutral-400 text-neutral-900'
@@ -397,7 +385,7 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 						className={cl(
 							'h-10 w-28 min-w-28 rounded-lg border-2 text-base font-bold relative',
 							'focus:ring-transparent focus:!border-neutral-600',
-							'disabled:bg-neutral-300 bg-yellow',
+							'disabled:bg-neutral-300 bg-orange',
 							'border-neutral-600',
 							'disabled:cursor-not-allowed',
 							'disabled:text-neutral-400 text-neutral-900'
@@ -434,20 +422,15 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 		props?.vault?.onChainData?.vaultPricePerShare.normalized
 	]);
 
-	const hasVaultTokens =
-		props.vault.onChainData?.vaultBalanceOf?.raw !== 0n ||
-		props.vault.onChainData?.stakingBalanceOf?.raw !== 0n ||
-		props.vault.onChainData?.autoCoumpoundingVaultBalance?.raw !== 0n;
-
 	return (
 		<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
-			<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4 leading-4'}>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-beige p-4 leading-4'}>
 				<b
 					suppressHydrationWarning
 					className={'block pb-2 text-neutral-900'}>
-					{`Extra ${props.vault.rewardSymbol}: `}
-					{getVaultAPR(props?.vault?.yDaemonData)}
-					{' +'}
+					{'Rewards: '}
+					{formatVaultAPR(props?.vault?.yDaemonData)}
+					{' APR +'}
 				</b>
 				<b
 					suppressHydrationWarning
@@ -457,7 +440,7 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 					})}/week`}
 				</b>
 			</div>
-			<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4 leading-4'}>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-beige p-4 leading-4'}>
 				<b className={'block pb-2 text-neutral-900'}>{'TVL'}</b>
 				<b
 					className={'block text-3xl text-neutral-900'}
@@ -471,33 +454,18 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 					)}
 				</b>
 			</div>
-			{hasVaultTokens ? (
-				<div
-					className={cl(
-						'col-span-2 flex items-center justify-between rounded-lg border-2',
-						'leading-4 border-neutral-900 bg-yellow p-4'
-					)}>
-					<b className={'block text-neutral-900'}>{'You staked'}</b>
-					<b
-						className={'block text-neutral-900'}
-						suppressHydrationWarning>
-						{`${formatAmount(depositedAndStaked, 4)} ${props.vault.tokenSymbol}`}
-					</b>
-				</div>
-			) : (
-				<div
-					className={cl(
-						'col-span-2 rounded-lg grid gap-5 mb-36',
-						'border-2 border-neutral-900 bg-yellow p-4'
-					)}>
-					<IconBigChevron className={'text-orange'} />
-					<p
-						className={'block text-xl text-neutral-900'}
-						suppressHydrationWarning>
-						{`Deposit on the left and *poof* you can juice your tokens with extra APR or extra ${props.vault.rewardSymbol}.`}
-					</p>
-				</div>
-			)}
+			<div
+				className={cl(
+					'col-span-2 flex items-center justify-between rounded-lg border-2',
+					'leading-4 border-neutral-900 bg-beige p-4'
+				)}>
+				<b className={'block '}>{'Your deposit'}</b>
+				<b
+					className={'block '}
+					suppressHydrationWarning>
+					{`${formatAmount(depositedAndStaked, 4)} ${props.vault.tokenSymbol}`}
+				</b>
+			</div>
 		</div>
 	);
 }
@@ -505,13 +473,13 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 function MobileStats(props: {vault: TVaultData}): ReactElement {
 	return (
 		<div className={'grid md:hidden'}>
-			<div className={'rounded-lg border-2 border-neutral-900 bg-yellow p-4'}>
+			<div className={'rounded-lg border-2 border-neutral-900 bg-beige p-4'}>
 				<div className={'flex items-center justify-between'}>
 					<p
 						suppressHydrationWarning
 						className={'block text-sm text-neutral-900'}>
 						{`Extra ${props.vault.rewardSymbol}: `}
-						{getVaultAPR(props?.vault?.yDaemonData)}
+						{formatVaultAPR(props?.vault?.yDaemonData)}
 						{' +'}
 					</p>
 					<b
@@ -537,8 +505,8 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 					</b>
 				</div>
 
-				<div className={'mt-2 flex items-center justify-between border-t border-neutral-0/40 pt-2'}>
-					<p className={'block text-sm text-neutral-900'}>{'Staked'}</p>
+				<div className={'mt-2 flex items-center justify-between border-t border-neutral-900 pt-2'}>
+					<p className={'block text-sm text-neutral-900'}>{'Your deposit'}</p>
 					<b
 						className={'block text-neutral-900'}
 						suppressHydrationWarning>
@@ -551,23 +519,25 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 }
 
 export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
-	const hasVaultTokens =
-		props.vault.onChainData?.vaultBalanceOf?.raw !== 0n ||
-		props.vault.onChainData?.stakingBalanceOf?.raw !== 0n ||
-		props.vault.onChainData?.autoCoumpoundingVaultBalance?.raw !== 0n;
-
 	return (
-		<div className={'p-2 pt-[30px] md:p-8'}>
-			<DesktopStats {...props} />
-			<MobileStats {...props} />
-
-			{hasVaultTokens ? (
-				<>
-					<StakeSection {...props} />
-					<UnstakeSection {...props} />
-					<ClaimSection {...props} />
-				</>
-			) : null}
+		<div className={'flex flex-1 flex-col gap-4 rounded-lg border-2 border-neutral-900 bg-yellow px-4 py-6'}>
+			<header className={'flex items-center gap-4'}>
+				<div
+					className={cl(
+						'flex size-12 items-center justify-center rounded-full',
+						'bg-beige border-2 border-neutral-900'
+					)}>
+					<IconGold className={'size-8'} />
+				</div>
+				<h3 className={'text-lg font-bold uppercase'}>{'Manual claim'}</h3>
+			</header>
+			<main className={'flex flex-col gap-6'}>
+				<DesktopStats {...props} />
+				<MobileStats {...props} />
+				<StakeSection {...props} />
+				<UnstakeSection {...props} />
+				<ClaimSection {...props} />
+			</main>
 		</div>
 	);
 }

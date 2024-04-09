@@ -12,6 +12,7 @@ export type TVaultListItem = {
 	stakingAddress: TAddress;
 	rewardAddress: TAddress;
 	autoCompoundingAddress: TAddress;
+	version: 1 | 2;
 };
 
 export type TPriceData = {
@@ -40,4 +41,13 @@ export type TVaultData = TVaultListItem & {
 	prices: TPriceData | undefined;
 	yDaemonData: TYDaemonVault;
 	autoCompoundingAPR: number;
+};
+
+export type TVault = {
+	totalDeposit: number;
+	vaultAddress: TAddress;
+	isFetched: boolean;
+	apr: number;
+	tvl: number;
+	rewardsValue: number;
 };
