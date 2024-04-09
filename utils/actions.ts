@@ -1,9 +1,11 @@
 import {assert, assertAddress} from '@builtbymom/web3/utils';
 import {handleTx, toWagmiProvider} from '@builtbymom/web3/utils/wagmi/provider';
+import {ZAP_ABI} from '@utils/abi/zap.abi';
 
 import {YVAULT_STAKING_ABI} from './abi/yVaultStaking.abi';
 import {YVAULT_V3_ABI} from './abi/yVaultV3.abi';
 
+import type {TAddress} from '@builtbymom/web3/types';
 import type {TTxResponse} from '@builtbymom/web3/utils/wagmi';
 import type {TWriteTransaction} from '@builtbymom/web3/utils/wagmi/provider';
 
@@ -29,7 +31,8 @@ export async function redeemV3Shares(props: TRedeemV3Shares): Promise<TTxRespons
 			address: props.contractAddress,
 			abi: YVAULT_V3_ABI,
 			functionName: 'redeem',
-			args: [props.amount, wagmiProvider.address, wagmiProvider.address, 1n] // 1n is 0.01% max_loss in BPS
+			args: [props.amount, wagmiProvider.address, wagmiProvider.address, 1n], // 1n is 0.01% max_loss in BPS
+			confirmation: 1
 		}
 	);
 }
@@ -50,13 +53,15 @@ export async function depositERC20(props: TDepositERC20Args): Promise<TTxRespons
 	assert(props.connector, 'No connector');
 
 	const wagmiProvider = await toWagmiProvider(props.connector);
+
 	return await handleTx(
 		{...props, shouldDisplayErrorToast: true, shouldDisplaySuccessToast: false},
 		{
 			address: props.contractAddress,
 			abi: YVAULT_V3_ABI,
 			functionName: 'deposit',
-			args: [props.amount, wagmiProvider.address]
+			args: [props.amount, wagmiProvider.address],
+			confirmation: 1
 		}
 	);
 }
@@ -82,7 +87,8 @@ export async function stakeERC20(props: TStakeERC20Args): Promise<TTxResponse> {
 			address: props.contractAddress,
 			abi: YVAULT_STAKING_ABI,
 			functionName: 'stake',
-			args: [props.amount]
+			args: [props.amount],
+			confirmation: 1
 		}
 	);
 }
@@ -103,7 +109,8 @@ export async function exit(props: TExit): Promise<TTxResponse> {
 		{
 			address: props.contractAddress,
 			abi: YVAULT_STAKING_ABI,
-			functionName: 'exit'
+			functionName: 'exit',
+			confirmation: 1
 		}
 	);
 }
@@ -128,7 +135,8 @@ export async function unstakeSome(props: TUnstake): Promise<TTxResponse> {
 			address: props.contractAddress,
 			abi: YVAULT_STAKING_ABI,
 			functionName: 'withdraw',
-			args: [props.amount]
+			args: [props.amount],
+			confirmation: 1
 		}
 	);
 }
@@ -149,7 +157,59 @@ export async function claimRewards(props: TClaimRewards): Promise<TTxResponse> {
 		{
 			address: props.contractAddress,
 			abi: YVAULT_STAKING_ABI,
-			functionName: 'getReward'
+			functionName: 'getReward',
+			confirmation: 1
 		}
 	);
+}
+
+/* 🔵 - Yearn Finance **********************************************************
+ ** ZapIn is a _WRITE_ function that allows a user to deposit a token into an
+ ** earning position directly.
+ **
+ ** @app - Vaults
+ ******************************************************************************/
+type TZapIn = TWriteTransaction & {
+	amount: bigint;
+	vaultAddress: TAddress;
+};
+export async function zapIn(props: TZapIn): Promise<TTxResponse> {
+	assert(props.connector, 'No connector');
+	assertAddress(props.contractAddress, 'contractAddress');
+	assertAddress(props.vaultAddress, 'vaultAddress');
+	assert(props.amount > 0n, 'Amount is 0');
+
+	return await handleTx(props, {
+		address: props.contractAddress,
+		abi: ZAP_ABI,
+		functionName: 'zapIn',
+		confirmation: 1,
+		args: [props.vaultAddress, props.amount]
+	});
+}
+
+/* 🔵 - Yearn Finance **********************************************************
+ ** ZapIn is a _WRITE_ function that allows a user to deposit a token into an
+ ** earning position directly.
+ **
+ ** @app - Vaults
+ ******************************************************************************/
+type TZapOut = TWriteTransaction & {
+	amount: bigint;
+	vaultAddress: TAddress;
+	exit: boolean;
+};
+export async function zapOut(props: TZapOut): Promise<TTxResponse> {
+	assert(props.connector, 'No connector');
+	assertAddress(props.contractAddress, 'contractAddress');
+	assertAddress(props.vaultAddress, 'vaultAddress');
+	assert(props.amount > 0n, 'Amount is 0');
+
+	return await handleTx(props, {
+		address: props.contractAddress,
+		abi: ZAP_ABI,
+		functionName: 'zapOut',
+		confirmation: 1,
+		args: [props.vaultAddress, props.amount, props.exit]
+	});
 }

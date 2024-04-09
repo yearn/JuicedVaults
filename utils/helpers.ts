@@ -11,7 +11,27 @@ export function toSafeChainID(chainID: number): number {
 	return chainID;
 }
 
-export function getVaultAPR(vault: TYDaemonVault | undefined): string {
+export function getVaultAPR(vault: TYDaemonVault | undefined): number {
+	const vaultAPRObject = vault?.apr;
+	if (!vaultAPRObject) {
+		return 0;
+	}
+	const spotAPR = Number(vaultAPRObject?.forwardAPR?.composite?.v3OracleCurrentAPR || 0);
+	const weekAPR = Number(vaultAPRObject?.points?.weekAgo || 0);
+	const monthAPR = Number(vaultAPRObject?.points?.monthAgo || 0);
+	if (spotAPR > 0) {
+		return spotAPR * 100;
+	}
+	if (monthAPR > 0) {
+		return monthAPR * 100;
+	}
+	if (weekAPR > 0) {
+		return weekAPR * 100;
+	}
+	return 0;
+}
+
+export function formatVaultAPR(vault: TYDaemonVault | undefined): string {
 	const vaultAPRObject = vault?.apr;
 	if (!vaultAPRObject) {
 		return formatPercent(0);

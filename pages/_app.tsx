@@ -1,4 +1,4 @@
-import React, {Fragment} from 'react';
+import React from 'react';
 import {Toaster} from 'react-hot-toast';
 import localFont from 'next/font/local';
 import Head from 'next/head';
@@ -8,6 +8,7 @@ import {WithMom} from '@builtbymom/web3/contexts/WithMom';
 import {localhost} from '@builtbymom/web3/utils/wagmi/networks';
 import IconCheck from '@icons/IconCheck';
 import IconCircleCross from '@icons/IconCircleCross';
+import {Header} from '@common/Header';
 import Meta from '@common/Meta';
 
 import type {AppProps} from 'next/app';
@@ -59,18 +60,21 @@ function MyApp({Component, ...props}: AppProps): ReactElement {
 					'https://raw.githubusercontent.com/SmolDapp/tokenLists/main/lists/ajna.json'
 				]}>
 				<WalletContextApp>
-					<Fragment>
-						<main className={`relative mx-auto mb-0 flex min-h-screen w-full flex-col ${aeonik.variable}`}>
+					<div className={'${aeonik.variable} mx-auto flex size-full h-screen flex-col'}>
+						<div className={'bg-orange'}>
+							<Header />
+						</div>
+						<main className={'relative flex h-full flex-col justify-between'}>
 							<Component {...props} />
-							<div className={'mx-auto flex w-full max-w-6xl justify-center pb-10 text-center'}>
+							<footer className={'mx-auto mt-10 flex w-full max-w-6xl justify-center pb-5 text-center'}>
 								<small className={'block w-full text-xs text-neutral-400 md:w-2/3 md:text-sm'}>
 									{
 										'These Vaults deposit into Ajna, a new protocol. Unlike real juice, these strategies are not 100% liquid. There may be times when you cannot withdraw all of your funds. Proceed with caution.'
 									}
 								</small>
-							</div>
+							</footer>
 						</main>
-					</Fragment>
+					</div>
 				</WalletContextApp>
 			</WithMom>
 			<Toaster

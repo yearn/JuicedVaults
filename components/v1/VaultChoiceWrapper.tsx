@@ -13,11 +13,11 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 	const [selectedTab, set_selectedTab] = useState<number>(0);
 
 	return (
-		<div className={'p-4 md:p-6'}>
+		<>
 			<div
 				className={cl(
 					'relative border-2 rounded-2xl border-neutral-900 overflow-hidden',
-					selectedTab === 0 ? 'bg-blue' : 'bg-orange'
+					selectedTab === 0 ? 'bg-blue' : 'bg-yellow'
 				)}>
 				<div className={'grid grid-cols-2'}>
 					<button
@@ -30,7 +30,7 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 						<div
 							className={cl(
 								'hidden md:flex size-12 items-center justify-center rounded-full',
-								'bg-pink border-2 border-neutral-900'
+								'bg-beige border-2 border-neutral-900'
 							)}>
 							<IconRecycle className={'size-8'} />
 						</div>
@@ -41,11 +41,11 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 						className={cl(
 							'flex space-x-2 items-center',
 							'w-full rounded-2xl rounded-br-none rounded-tl-none rounded-tr-none border-b-2 border-l-2 p-2 md:px-8 py-4 text-left',
-							selectedTab === 1 ? 'border-transparent' : 'bg-orange border-neutral-900'
+							selectedTab === 1 ? 'border-transparent' : 'bg-yellow border-neutral-900'
 						)}>
 						<div
 							className={
-								'hidden size-12 items-center justify-center rounded-full border-2 border-neutral-900 bg-yellow md:flex'
+								'hidden size-12 items-center justify-center rounded-full border-2 border-neutral-900 bg-beige md:flex'
 							}>
 							<IconGold className={'size-8'} />
 						</div>
@@ -56,6 +56,6 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 				{selectedTab === 0 ? <StakerWithCompounding {...props} /> : null}
 				{selectedTab === 1 ? <StakerWithReward {...props} /> : null}
 			</div>
-		</div>
+		</>
 	);
 }

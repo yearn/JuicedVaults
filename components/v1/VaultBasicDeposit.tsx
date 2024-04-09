@@ -18,7 +18,7 @@ import {
 import {approveERC20, defaultTxStatus, getNetwork} from '@builtbymom/web3/utils/wagmi';
 import {IconSpinner} from '@icons/IconSpinner';
 import {depositERC20, redeemV3Shares} from '@utils/actions';
-import {convertToYVToken, getVaultAPR, onInput, toSafeChainID} from '@utils/helpers';
+import {convertToYVToken, formatVaultAPR, onInput, toSafeChainID} from '@utils/helpers';
 import {erc20ABI} from '@wagmi/core';
 import {ImageWithFallback} from '@common/ImageWithFallback';
 
@@ -313,7 +313,7 @@ export function DesktopStats(props: {vault: TVaultData}): ReactElement {
 				<b
 					suppressHydrationWarning
 					className={'block text-3xl text-beige'}>
-					{getVaultAPR(props?.vault?.yDaemonData)}
+					{formatVaultAPR(props?.vault?.yDaemonData)}
 				</b>
 			</div>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4 leading-4'}>
@@ -363,7 +363,7 @@ export function MobileStats(props: {vault: TVaultData}): ReactElement {
 					<b
 						className={'block text-beige'}
 						suppressHydrationWarning>
-						{getVaultAPR(props?.vault?.yDaemonData)}
+						{formatVaultAPR(props?.vault?.yDaemonData)}
 					</b>
 				</div>
 				<div className={'flex items-center justify-between'}>
@@ -398,7 +398,7 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 	const blockExplorer = getNetwork(props.vault.chainID).blockExplorers?.etherscan?.url;
 
 	return (
-		<div className={'relative flex flex-col p-4 md:p-8'}>
+		<div className={'relative flex flex-col'}>
 			<div className={'flex flex-row items-center space-x-4 pb-6 pt-4 md:pb-[42px]'}>
 				<ImageWithFallback
 					alt={props.vault.tokenSymbol}
