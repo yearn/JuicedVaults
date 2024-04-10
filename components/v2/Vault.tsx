@@ -1,6 +1,7 @@
 import {useEffect, useMemo, useState} from 'react';
 import {StakerWithCompounding} from 'components/v2/StakerWithCompounding';
 import {StakerWithReward} from 'components/v2/StakerWithReward';
+import {useBlockExplorer} from 'hooks/useBlockExplorer';
 import {useReadContracts} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useFetch} from '@builtbymom/web3/hooks/useFetch';
@@ -40,7 +41,7 @@ export function VaultV2(props: {
 	const [onChainVault, set_onChainVault] = useState<TVaultData['onChainData']>(undefined);
 	const [nonce, set_nonce] = useState<number>(0);
 
-	const blockExplorer = getNetwork(vault.chainID).blockExplorers?.etherscan?.url;
+	const blockExplorer = useBlockExplorer(props.vault.chainID);
 
 	useIntervalEffect(() => set_nonce(nonce + 1), 3500);
 
