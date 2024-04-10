@@ -1,5 +1,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import {toast} from 'react-hot-toast';
+import {useBlockExplorer} from 'hooks/useBlockExplorer';
 import {useReadContract} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {
@@ -395,7 +396,7 @@ export function MobileStats(props: {vault: TVaultData}): ReactElement {
 }
 
 export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData: () => void}): ReactElement {
-	const blockExplorer = getNetwork(props.vault.chainID).blockExplorers?.etherscan?.url;
+	const blockExplorer = useBlockExplorer(props.vault.chainID);
 
 	return (
 		<div className={'relative flex flex-col'}>
