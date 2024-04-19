@@ -19,7 +19,7 @@ function Home(): ReactElement {
 	const [queryArguments, set_queryArguments] = useState<TQuery>({});
 	const [vaultsData, set_vaultsData] = useState<TDict<TVault>>({});
 	const listView = useLocalStorageValue('isListView', {
-		defaultValue: false,
+		defaultValue: true,
 		initializeWithValue: true
 	});
 	const [isListView, set_isListView] = useState(false);
