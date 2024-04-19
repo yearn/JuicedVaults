@@ -36,7 +36,7 @@ function Header(): ReactElement {
 								title={label}
 								className={cl(
 									'hover-fix text-center',
-									(pathname.startsWith(href) && href !== '/') || pathname === href
+									href.startsWith('/') || pathname === href
 										? 'font-bold text-neutral-900'
 										: 'text-[#552E08] transition-all hover:text-neutral-900 hover:font-bold'
 								)}>

@@ -21,23 +21,23 @@ export type TPriceData = {
 	rewardToken: TNormalizedBN;
 };
 
-export type TVaultData = TVaultListItem & {
-	onChainData:
-		| {
-				totalVaultSupply: TNormalizedBN;
-				vaultBalanceOf: TNormalizedBN;
-				tokenBalanceOf: TNormalizedBN;
-				totalStakingSupply: TNormalizedBN;
-				stakingBalanceOf: TNormalizedBN;
-				rewardEarned: TNormalizedBN;
-				vaultPricePerShare: TNormalizedBN;
-				autoCompoundingVaultPricePerShare: TNormalizedBN;
+export type TVaultOnchainData = {
+	totalVaultSupply: TNormalizedBN;
+	vaultBalanceOf: TNormalizedBN;
+	tokenBalanceOf: TNormalizedBN;
+	totalStakingSupply: TNormalizedBN;
+	stakingBalanceOf: TNormalizedBN;
+	rewardEarned: TNormalizedBN;
+	vaultPricePerShare: TNormalizedBN;
+	autoCompoundingVaultPricePerShare: TNormalizedBN;
 
-				autoCoumpoundingVaultSupply: TNormalizedBN;
-				autoCoumpoundingVaultBalance: TNormalizedBN;
-				weeklyStakingRewards: number;
-		  }
-		| undefined;
+	autoCoumpoundingVaultSupply: TNormalizedBN;
+	autoCoumpoundingVaultBalance: TNormalizedBN;
+	weeklyStakingRewards: number;
+};
+
+export type TVaultData = TVaultListItem & {
+	onChainData: TVaultOnchainData | undefined;
 	prices: TPriceData | undefined;
 	yDaemonData: TYDaemonVault;
 	autoCompoundingAPR: number;
@@ -50,4 +50,13 @@ export type TVault = {
 	apr: number;
 	tvl: number;
 	rewardsValue: number;
+};
+
+export type TVaultUIProps = {
+	vault: TVaultListItem;
+	onChainData?: TVaultOnchainData;
+	prices?: TPriceData;
+	yDaemonData: TYDaemonVault;
+	onRefreshVaultData: () => void;
+	expectedAutoCompoundAPR: number;
 };
