@@ -2,6 +2,7 @@ import {type ReactElement, useMemo} from 'react';
 import Link from 'next/link';
 import {GridViewVault} from 'components/v1/GridViewVault';
 import {cl, formatAmount, formatPercent, formatWithUnit} from '@builtbymom/web3/utils';
+import {getNetwork} from '@builtbymom/web3/utils/wagmi';
 import {getVaultAPR, toSafeChainID} from '@utils/helpers';
 import {Counter} from '@common/Counter';
 import {ImageWithFallback} from '@common/ImageWithFallback';
@@ -73,7 +74,11 @@ export function ListViewVault(props: TVaultUIProps): ReactElement {
 						/>
 						<div>
 							<h2 className={'text-lg font-bold'}>{vault.name}</h2>
-							<p className={'text-xs text-neutral-900/80'}>{`Deposit: ${vault.tokenSymbol}`}</p>
+							<p className={'pb-4 text-xs text-neutral-900/80'}>{`Deposit: ${vault.tokenSymbol}`}</p>
+							<p className={'text-xs text-neutral-900/80'}>
+								{'Network: '}
+								{getNetwork(vault.chainID).name}
+							</p>
 						</div>
 					</div>
 				</section>
