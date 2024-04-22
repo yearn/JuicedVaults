@@ -72,10 +72,10 @@ export function ListViewVault(props: TVaultUIProps): ReactElement {
 							src={`${process.env.SMOL_ASSETS_URL}/token/${toSafeChainID(vault.chainID)}/${vault.tokenAddress}/logo-128.png`}
 							className={'size-8'}
 						/>
-						<div>
+						<div className={'flex flex-col gap-1'}>
 							<h2 className={'text-lg font-bold'}>{vault.name}</h2>
-							<p className={'pb-4 text-xs text-neutral-900/80'}>{`Deposit: ${vault.tokenSymbol}`}</p>
-							<p className={'text-xs text-neutral-900/80'}>
+							<p className={'text-xs text-neutral-500'}>{`Deposit: ${vault.tokenSymbol}`}</p>
+							<p className={'text-xs text-neutral-500'}>
 								{'Network: '}
 								{getNetwork(vault.chainID).name}
 							</p>
