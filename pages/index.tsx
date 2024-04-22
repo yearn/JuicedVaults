@@ -36,12 +36,12 @@ function Home(): ReactElement {
 		});
 	}, []);
 
-	const isAllPoolsLoaded =
+	const isAllVaultsLoaded =
 		Object.keys(vaultsData).length === VAULT_LIST.length &&
 		Object.values(vaultsData).every(vault => vault.isFetched);
 
 	const vaultsList = useMemo((): TVaultListItem[] => {
-		if (!isAllPoolsLoaded) {
+		if (!isAllVaultsLoaded) {
 			return VAULT_LIST;
 		}
 
@@ -63,7 +63,7 @@ function Home(): ReactElement {
 				const vaultAData = vaultsData[a.vaultAddress];
 				const vaultBData = vaultsData[b.vaultAddress];
 
-				return vaultBData.rewardsValue - vaultAData.rewardsValue;
+				return vaultBData.rewardValue - vaultAData.rewardValue;
 			});
 		}
 
@@ -84,6 +84,14 @@ function Home(): ReactElement {
 				return vaultBData.tvl - vaultAData.tvl;
 			});
 		}
+		if (queryArguments.filter === 'claimable') {
+			return clonedVaults.sort((a, b) => {
+				const vaultAData = vaultsData[a.vaultAddress];
+				const vaultBData = vaultsData[b.vaultAddress];
+
+				return vaultBData.rewardClaimable - vaultAData.rewardClaimable;
+			});
+		}
 
 		/**************************************************************************
 		 ** Default filter is queryArguments.filter === 'deposited'
@@ -97,7 +105,7 @@ function Home(): ReactElement {
 
 			return bDeposited - aDeposited || vaultBData.apr - vaultAData.apr;
 		});
-	}, [queryArguments, vaultsData, isAllPoolsLoaded]);
+	}, [queryArguments, vaultsData, isAllVaultsLoaded]);
 
 	return (
 		<div>
@@ -134,13 +142,13 @@ function Home(): ReactElement {
 					/>
 				</div>
 
-				{!isAllPoolsLoaded && (
+				{!isAllVaultsLoaded && (
 					<div className={'mt-16 flex justify-center'}>
 						<IconSpinner className={'text-neutral-900'} />
 					</div>
 				)}
 
-				<div className={cl('grid w-full gap-4', !isAllPoolsLoaded ? 'hidden' : '')}>
+				<div className={cl('grid w-full gap-4', !isAllVaultsLoaded ? 'hidden' : '')}>
 					{vaultsList.map(vault =>
 						vault.version === 1 ? (
 							<VaultV1

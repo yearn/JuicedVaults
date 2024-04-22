@@ -49,7 +49,8 @@ export type TVault = {
 	isFetched: boolean;
 	apr: number;
 	tvl: number;
-	rewardsValue: number;
+	rewardValue: number;
+	rewardClaimable: number;
 };
 
 export type TVaultUIProps = {

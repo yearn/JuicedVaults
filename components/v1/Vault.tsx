@@ -186,6 +186,10 @@ export function VaultV1(props: {
 			? zeroNormalizedBN
 			: toNormalizedBN(decodeAsBigInt(onChainData[1]), vault.decimals);
 
+		const rewardEarned = isZeroAddress(address)
+			? zeroNormalizedBN
+			: toNormalizedBN(decodeAsBigInt(onChainData[5]), 18);
+
 		set_onChainVault({
 			totalVaultSupply: toNormalizedBN(decodeAsBigInt(onChainData[0]), vault.decimals),
 			vaultBalanceOf,
@@ -196,9 +200,7 @@ export function VaultV1(props: {
 			stakingBalanceOf: isZeroAddress(address)
 				? zeroNormalizedBN
 				: toNormalizedBN(decodeAsBigInt(onChainData[4]), vault.decimals),
-			rewardEarned: isZeroAddress(address)
-				? zeroNormalizedBN
-				: toNormalizedBN(decodeAsBigInt(onChainData[5]), 18),
+			rewardEarned,
 			autoCoumpoundingVaultSupply,
 			autoCoumpoundingVaultBalance,
 			weeklyStakingRewards: rewardsPerWeek,
@@ -219,7 +221,8 @@ export function VaultV1(props: {
 			(autoCoumpoundingVaultSupply?.normalized || 0) * (pricesForVault?.vaultToken.normalized || 0);
 		const rewardTvl = (rewardContractTotalSupply?.normalized || 0) * (pricesForVault?.vaultToken.normalized || 0);
 
-		const rewardsValue = rewardsPerWeek * (pricesForVault?.rewardToken.normalized || 0);
+		const rewardValue = rewardsPerWeek * (pricesForVault?.rewardToken.normalized || 0);
+		const rewardClaimable = rewardEarned.normalized * (pricesForVault?.rewardToken.normalized || 0);
 
 		const apr = expectedAutoCompoundAPR + extraAPR;
 
@@ -229,7 +232,8 @@ export function VaultV1(props: {
 				totalDeposit: vaultDeposit + rewardsDeposit + autoCompoundingDeposit,
 				apr,
 				tvl: autoCompoundTvl + rewardTvl,
-				rewardsValue,
+				rewardValue,
+				rewardClaimable,
 				isFetched: true
 			});
 		}
