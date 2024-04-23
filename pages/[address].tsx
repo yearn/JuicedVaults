@@ -5,6 +5,7 @@ import {HeaderTitle} from 'components/HeaderTitle';
 import {VaultV1} from 'components/v1/Vault';
 import {VaultV2} from 'components/v2/Vault';
 import {cl, toAddress} from '@builtbymom/web3/utils';
+import {IconBack} from '@icons/IconBack';
 import {VAULT_LIST} from '@utils/vaultList';
 import {useFetchYearnPrices} from '@yearn-finance/web-lib/hooks/useFetchYearnPrices';
 
@@ -80,7 +81,13 @@ function VaultByAddress(props: {pageProps: {address: string}}): ReactElement {
 					<HeaderTitle className={'relative z-10 w-full md:h-[460px] md:w-[628px]'} />
 				</div>
 			</div>
-			<div className={'mx-auto mt-10 w-full max-w-6xl'}>
+			<Link
+				href={'/'}
+				className={'my-4 flex items-center'}>
+				<IconBack className={'size-16 text-neutral-600'} />
+				<h3 className={'text-lg font-semibold text-neutral-600'}>{'Back to all Vaults'}</h3>
+			</Link>
+			<div className={'mx-auto w-full max-w-6xl'}>
 				{selectedVault.version === 1 ? (
 					<VaultV1
 						key={selectedVault.stakingAddress}
