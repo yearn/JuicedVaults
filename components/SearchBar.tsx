@@ -195,6 +195,14 @@ function SearchBar({
 						}`}>
 						{'TVL'}
 					</button>
+					<button
+						id={'trigger-filterClaimable'}
+						onClick={() => triggerFilter('claimable')}
+						className={`hover-fix hidden text-sm md:text-base ${
+							queryArguments.filter === 'claimable' ? 'font-bold underline' : ''
+						}`}>
+						{'Claimable'}
+					</button>
 				</div>
 				<form
 					id={'search-form'}

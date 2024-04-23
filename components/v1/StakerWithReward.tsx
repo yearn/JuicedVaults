@@ -174,7 +174,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 	return (
 		<div className={'pt-6'}>
 			<b className={'mb-2 block'}>{'Stake'}</b>
-			<div className={'flex flex-col gap-2 md:flex-row'}>
+			<div className={'flex flex-col gap-2 lg:flex-row'}>
 				<input
 					className={cl(
 						'h-10 w-full overflow-x-scroll rounded-lg px-2 py-4 font-bold outline-none scrollbar-none',
@@ -250,7 +250,7 @@ function UnstakeSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 	return (
 		<div className={'pt-6'}>
 			<b className={'mb-2 block'}>{'Unstake'}</b>
-			<div className={'flex flex-col gap-2 md:flex-row'}>
+			<div className={'flex flex-col gap-2 lg:flex-row'}>
 				<input
 					className={cl(
 						'h-10 w-full overflow-x-scroll rounded-lg px-2 py-4 font-bold outline-none scrollbar-none',
@@ -345,7 +345,7 @@ function ClaimSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 	return (
 		<div className={'pt-6'}>
 			<b className={'mb-2 block'}>{'Claim rewards'}</b>
-			<div className={'flex flex-col gap-2 md:flex-row'}>
+			<div className={'flex flex-col gap-2 lg:flex-row'}>
 				<div
 					className={cl(
 						'h-10 w-full overflow-x-scroll rounded-lg px-2 outline-none scrollbar-none',
@@ -443,7 +443,7 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 		props.vault.onChainData?.autoCoumpoundingVaultBalance?.raw !== 0n;
 
 	return (
-		<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
+		<div className={'hidden grid-cols-2 gap-4 pt-0.5 lg:grid'}>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-beige p-4 leading-4'}>
 				<b
 					suppressHydrationWarning
@@ -507,7 +507,7 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 
 function MobileStats(props: {vault: TVaultData}): ReactElement {
 	return (
-		<div className={'grid md:hidden'}>
+		<div className={'grid lg:hidden'}>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-beige p-4'}>
 				<div className={'flex items-center justify-between'}>
 					<p
@@ -560,7 +560,7 @@ export function StakerWithReward(props: {vault: TVaultData; onRefreshVaultData: 
 		props.vault.onChainData?.autoCoumpoundingVaultBalance?.raw !== 0n;
 
 	return (
-		<div className={'p-2 pt-[30px] md:p-8'}>
+		<div className={'p-2 pt-[30px] lg:p-8'}>
 			<DesktopStats {...props} />
 			<MobileStats {...props} />
 

@@ -152,7 +152,7 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 	return (
 		<div className={'pt-6'}>
 			<b className={'mb-2 block'}>{'Deposit'}</b>
-			<div className={'flex flex-col gap-2 md:flex-row'}>
+			<div className={'flex flex-col gap-2 lg:flex-row'}>
 				<input
 					className={cl(
 						'h-10 w-full overflow-x-scroll rounded-lg px-2 py-4 font-bold outline-none scrollbar-none',
@@ -226,7 +226,7 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 	return (
 		<div className={'pt-6'}>
 			<b className={'mb-2 block'}>{'Withdraw'}</b>
-			<div className={'flex flex-col gap-2 md:flex-row'}>
+			<div className={'flex flex-col gap-2 lg:flex-row'}>
 				<input
 					className={cl(
 						'h-10 w-full overflow-x-scroll rounded-lg px-2 py-4 font-bold outline-none scrollbar-none',
@@ -308,7 +308,7 @@ export function DesktopStats(props: {vault: TVaultData}): ReactElement {
 	}, [props.vault?.onChainData?.totalVaultSupply]);
 
 	return (
-		<div className={'hidden grid-cols-2 gap-4 pt-0.5 md:grid'}>
+		<div className={'hidden grid-cols-2 gap-4 pt-0.5 lg:grid'}>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4 leading-4'}>
 				<b className={'block pb-2 text-beige'}>{'APR'}</b>
 				<b
@@ -357,7 +357,7 @@ export function MobileStats(props: {vault: TVaultData}): ReactElement {
 	]);
 
 	return (
-		<div className={'grid md:hidden'}>
+		<div className={'grid lg:hidden'}>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4'}>
 				<div className={'flex items-center justify-between'}>
 					<p className={'block text-sm text-beige'}>{'APR'}</p>
@@ -400,7 +400,7 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 
 	return (
 		<div className={'relative flex flex-col'}>
-			<div className={'flex flex-row items-center space-x-4 pb-6 pt-4 md:pb-[42px]'}>
+			<div className={'flex flex-row items-center space-x-4 pb-6 pt-4 lg:pb-[42px]'}>
 				<ImageWithFallback
 					alt={props.vault.tokenSymbol}
 					width={48}
@@ -408,7 +408,7 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 					src={`${process.env.SMOL_ASSETS_URL}/token/${toSafeChainID(props.vault.chainID)}/${props.vault.tokenAddress}/logo-128.png`}
 					className={'size-8'}
 				/>
-				<b className={'block whitespace-break-spaces text-lg text-neutral-900 md:text-xl'}>
+				<b className={'block whitespace-break-spaces text-lg text-neutral-900 lg:text-xl'}>
 					{`Deposit ${props.vault.tokenSymbol} and then stake for `}
 					<span className={'text-blue'}>{'more APR'}</span>
 					{' or '}
@@ -422,7 +422,7 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 			<DepositSection {...props} />
 			<WithdrawSection {...props} />
 
-			<div className={'mt-auto hidden md:block'}>
+			<div className={'mt-auto hidden lg:block'}>
 				<b className={'block pb-2 text-xs'}>
 					{'Network: '}
 					{getNetwork(props.vault.chainID).name}

@@ -1,11 +1,13 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import Image from 'next/image';
 import {HeaderTitle} from 'components/HeaderTitle';
+import {ListViewHeader} from 'components/ListViewHeader';
 import {SearchBar, type TQuery} from 'components/SearchBar';
 import {VaultV1} from 'components/v1/Vault';
 import {VaultV2} from 'components/v2/Vault';
 import {cl} from '@builtbymom/web3/utils';
 import {IconSpinner} from '@icons/IconSpinner';
+import {useLocalStorageValue} from '@react-hookz/web';
 import {VAULT_LIST} from '@utils/vaultList';
 import {useFetchYearnPrices} from '@yearn-finance/web-lib/hooks/useFetchYearnPrices';
 
@@ -16,8 +18,17 @@ import type {TVault, TVaultListItem} from '@utils/types';
 function Home(): ReactElement {
 	const [queryArguments, set_queryArguments] = useState<TQuery>({});
 	const [vaultsData, set_vaultsData] = useState<TDict<TVault>>({});
+	const listView = useLocalStorageValue('isListView', {
+		defaultValue: true,
+		initializeWithValue: true
+	});
+	const [isListView, set_isListView] = useState(false);
 
 	const prices = useFetchYearnPrices();
+
+	useEffect(() => {
+		set_isListView(Boolean(listView.value));
+	}, [listView.value]);
 
 	const registerNewVault = useCallback((vault: TVault): void => {
 		set_vaultsData(prevState => {
@@ -25,12 +36,12 @@ function Home(): ReactElement {
 		});
 	}, []);
 
-	const isAllPoolsLoaded =
+	const isAllVaultsLoaded =
 		Object.keys(vaultsData).length === VAULT_LIST.length &&
 		Object.values(vaultsData).every(vault => vault.isFetched);
 
 	const vaultsList = useMemo((): TVaultListItem[] => {
-		if (!isAllPoolsLoaded) {
+		if (!isAllVaultsLoaded) {
 			return VAULT_LIST;
 		}
 
@@ -52,7 +63,7 @@ function Home(): ReactElement {
 				const vaultAData = vaultsData[a.vaultAddress];
 				const vaultBData = vaultsData[b.vaultAddress];
 
-				return vaultBData.rewardsValue - vaultAData.rewardsValue;
+				return vaultBData.rewardValue - vaultAData.rewardValue;
 			});
 		}
 
@@ -73,6 +84,14 @@ function Home(): ReactElement {
 				return vaultBData.tvl - vaultAData.tvl;
 			});
 		}
+		if (queryArguments.filter === 'claimable') {
+			return clonedVaults.sort((a, b) => {
+				const vaultAData = vaultsData[a.vaultAddress];
+				const vaultBData = vaultsData[b.vaultAddress];
+
+				return vaultBData.rewardClaimable - vaultAData.rewardClaimable;
+			});
+		}
 
 		/**************************************************************************
 		 ** Default filter is queryArguments.filter === 'deposited'
@@ -86,7 +105,7 @@ function Home(): ReactElement {
 
 			return bDeposited - aDeposited || vaultBData.apr - vaultAData.apr;
 		});
-	}, [queryArguments, vaultsData, isAllPoolsLoaded]);
+	}, [queryArguments, vaultsData, isAllVaultsLoaded]);
 
 	return (
 		<div>
@@ -116,13 +135,20 @@ function Home(): ReactElement {
 					/>
 				</div>
 
-				{!isAllPoolsLoaded && (
+				<div>
+					<ListViewHeader
+						isListView={isListView}
+						updateListView={listView.set}
+					/>
+				</div>
+
+				{!isAllVaultsLoaded && (
 					<div className={'mt-16 flex justify-center'}>
 						<IconSpinner className={'text-neutral-900'} />
 					</div>
 				)}
 
-				<div className={cl('grid w-full gap-4', !isAllPoolsLoaded ? 'hidden' : '')}>
+				<div className={cl('grid w-full gap-4', !isAllVaultsLoaded ? 'hidden' : '')}>
 					{vaultsList.map(vault =>
 						vault.version === 1 ? (
 							<VaultV1
@@ -130,6 +156,7 @@ function Home(): ReactElement {
 								prices={prices}
 								vault={vault}
 								registerNewVault={registerNewVault}
+								isListView={isListView}
 							/>
 						) : (
 							<VaultV2
@@ -137,6 +164,7 @@ function Home(): ReactElement {
 								prices={prices}
 								vault={vault}
 								registerNewVault={registerNewVault}
+								isListView={isListView}
 							/>
 						)
 					)}

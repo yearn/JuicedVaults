@@ -1,7 +1,6 @@
 import {useEffect, useMemo, useState} from 'react';
-import {StakerWithCompounding} from 'components/v2/StakerWithCompounding';
-import {StakerWithReward} from 'components/v2/StakerWithReward';
-import {useBlockExplorer} from 'hooks/useBlockExplorer';
+import {GridViewVault} from 'components/v2/GridViewVault';
+import {ListViewVault} from 'components/v2/ListViewVault';
 import {useReadContracts} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useFetch} from '@builtbymom/web3/hooks/useFetch';
@@ -14,7 +13,6 @@ import {
 	toNormalizedBN,
 	zeroNormalizedBN
 } from '@builtbymom/web3/utils';
-import {getNetwork} from '@builtbymom/web3/utils/wagmi';
 import {useIntervalEffect} from '@react-hookz/web';
 import {YVAULT_STAKING_ABI} from '@utils/abi/yVaultStaking.abi';
 import {YVAULT_V3_ABI} from '@utils/abi/yVaultV3.abi';
@@ -22,7 +20,6 @@ import {getVaultAPR, toSafeChainID} from '@utils/helpers';
 import {erc20ABI} from '@wagmi/core';
 import {useYDaemonBaseURI} from '@yearn-finance/web-lib/hooks/useYDaemonBaseURI';
 import {yDaemonVaultSchema} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
-import {ImageWithFallback} from '@common/ImageWithFallback';
 
 import type {ReactElement} from 'react';
 import type {TYDaemonPricesChain} from '@yearn-finance/web-lib/utils/schemas/yDaemonPricesSchema';
@@ -32,16 +29,15 @@ import type {TVault, TVaultData, TVaultListItem} from '@utils/types';
 export function VaultV2(props: {
 	vault: TVaultListItem;
 	prices: TYDaemonPricesChain;
-	registerNewVault: (pool: TVault) => void;
+	registerNewVault?: (pool: TVault) => void;
+	isListView: boolean;
 }): ReactElement {
-	const {vault, registerNewVault, prices} = props;
+	const {vault, registerNewVault, prices, isListView} = props;
 
 	const {address} = useWeb3();
 	const {yDaemonBaseUri} = useYDaemonBaseURI({chainID: toSafeChainID(vault.chainID)});
 	const [onChainVault, set_onChainVault] = useState<TVaultData['onChainData']>(undefined);
 	const [nonce, set_nonce] = useState<number>(0);
-
-	const blockExplorer = useBlockExplorer(props.vault.chainID);
 
 	useIntervalEffect(() => set_nonce(nonce + 1), 3500);
 
@@ -190,6 +186,10 @@ export function VaultV2(props: {
 			? zeroNormalizedBN
 			: toNormalizedBN(decodeAsBigInt(onChainData[1]), vault.decimals);
 
+		const rewardEarned = isZeroAddress(address)
+			? zeroNormalizedBN
+			: toNormalizedBN(decodeAsBigInt(onChainData[5]), 18);
+
 		set_onChainVault({
 			totalVaultSupply: toNormalizedBN(decodeAsBigInt(onChainData[0]), vault.decimals),
 			vaultBalanceOf,
@@ -198,9 +198,7 @@ export function VaultV2(props: {
 				: toNormalizedBN(decodeAsBigInt(onChainData[2]), vault.decimals),
 			totalStakingSupply: rewardContractTotalSupply,
 			stakingBalanceOf,
-			rewardEarned: isZeroAddress(address)
-				? zeroNormalizedBN
-				: toNormalizedBN(decodeAsBigInt(onChainData[5]), 18),
+			rewardEarned,
 			autoCoumpoundingVaultSupply,
 			autoCoumpoundingVaultBalance,
 			weeklyStakingRewards: rewardsPerWeek,
@@ -222,17 +220,19 @@ export function VaultV2(props: {
 			(autoCoumpoundingVaultSupply?.normalized || 0) * (pricesForVault?.vaultToken.normalized || 0);
 		const rewardTvl = (rewardContractTotalSupply?.normalized || 0) * (pricesForVault?.vaultToken.normalized || 0);
 
-		const rewardsValue = rewardsPerWeek * (pricesForVault?.rewardToken.normalized || 0);
+		const rewardValue = rewardsPerWeek * (pricesForVault?.rewardToken.normalized || 0);
+		const rewardClaimable = rewardEarned.normalized * (pricesForVault?.rewardToken.normalized || 0);
 
 		const apr = expectedAutoCompoundAPR + extraAPR;
 
 		if (isNumber(apr)) {
-			registerNewVault({
+			registerNewVault?.({
 				vaultAddress: vault.vaultAddress,
 				totalDeposit: autoCompoundingDeposit + rewardsDeposit,
 				apr,
 				tvl: autoCompoundTvl + rewardTvl,
-				rewardsValue,
+				rewardValue,
+				rewardClaimable,
 				isFetched: true
 			});
 		}
@@ -248,65 +248,26 @@ export function VaultV2(props: {
 		extraAPR
 	]);
 
+	if (isListView) {
+		return (
+			<ListViewVault
+				vault={vault}
+				prices={pricesForVault}
+				yDaemonData={yDaemonVault as TYDaemonVault}
+				onChainData={onChainVault}
+				expectedAutoCompoundAPR={expectedAutoCompoundAPR}
+				onRefreshVaultData={onRefreshVaultData}
+			/>
+		);
+	}
 	return (
-		<div className={'flex flex-col gap-8 rounded-lg border-4 border-neutral-900 p-4 md:px-8 md:py-6'}>
-			<div className={'flex gap-4'}>
-				<ImageWithFallback
-					alt={vault.tokenSymbol}
-					width={56}
-					height={56}
-					src={`${process.env.SMOL_ASSETS_URL}/token/${toSafeChainID(vault.chainID)}/${vault.tokenAddress}/logo-128.png`}
-					className={'size-8'}
-				/>
-				<div>
-					<h3 className={'text-xl font-bold'}>{vault.tokenSymbol}</h3>
-					<p>
-						{'Choose '}
-						<b className={'text-blue'}>{'Auto Compounding'}</b>
-						{' to enjoy boosted APR, or '}
-						<b className={'text-yellowHover'}>{'Manual Claim'}</b>{' '}
-						{'if you want to claim your tokens yourself.'}
-					</p>
-				</div>
-			</div>
-			<section className={'grid grid-cols-1 gap-4 md:grid-cols-2'}>
-				<StakerWithCompounding
-					vault={{
-						...vault,
-						prices: pricesForVault,
-						onChainData: onChainVault,
-						yDaemonData: yDaemonVault as TYDaemonVault,
-						autoCompoundingAPR: expectedAutoCompoundAPR
-					}}
-					onRefreshVaultData={onRefreshVaultData}
-				/>
-				<StakerWithReward
-					vault={{
-						...vault,
-						prices: pricesForVault,
-						onChainData: onChainVault,
-						yDaemonData: yDaemonVault as TYDaemonVault,
-						autoCompoundingAPR: expectedAutoCompoundAPR
-					}}
-					onRefreshVaultData={onRefreshVaultData}
-				/>
-			</section>
-			<footer className={'hidden flex-col justify-end gap-2 text-neutral-600 md:flex md:flex-row md:gap-6'}>
-				<p className={'text-xs'}>
-					{'Network: '}
-					{getNetwork(vault.chainID).name}
-				</p>
-				<p className={'text-xs '}>
-					<span>{'Contract: '}</span>
-					<a
-						className={'cursor-alias hover:underline'}
-						href={`${blockExplorer}/address/${vault.vaultAddress}`}
-						target={'_blank'}
-						rel={'noreferrer'}>
-						{vault.vaultAddress}
-					</a>
-				</p>
-			</footer>
-		</div>
+		<GridViewVault
+			vault={vault}
+			prices={pricesForVault}
+			yDaemonData={yDaemonVault as TYDaemonVault}
+			onChainData={onChainVault}
+			expectedAutoCompoundAPR={expectedAutoCompoundAPR}
+			onRefreshVaultData={onRefreshVaultData}
+		/>
 	);
 }

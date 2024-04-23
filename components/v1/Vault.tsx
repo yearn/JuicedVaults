@@ -1,11 +1,10 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {VaultBasicDeposit} from 'components/v1/VaultBasicDeposit';
-import {VaultChoiceWrapper} from 'components/v1/VaultChoiceWrapper';
+import {GridViewVault} from 'components/v1/GridViewVault';
+import {ListViewVault} from 'components/v1/ListViewVault';
 import {useReadContracts} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useFetch} from '@builtbymom/web3/hooks/useFetch';
 import {
-	cl,
 	decodeAsBigInt,
 	isNumber,
 	isZeroAddress,
@@ -30,9 +29,10 @@ import type {TVault, TVaultData, TVaultListItem} from '@utils/types';
 export function VaultV1(props: {
 	vault: TVaultListItem;
 	prices: TYDaemonPricesChain;
-	registerNewVault: (pool: TVault) => void;
+	registerNewVault?: (pool: TVault) => void;
+	isListView: boolean;
 }): ReactElement {
-	const {vault, registerNewVault, prices} = props;
+	const {vault, registerNewVault, prices, isListView} = props;
 
 	const {address} = useWeb3();
 	const {yDaemonBaseUri} = useYDaemonBaseURI({chainID: toSafeChainID(vault.chainID)});
@@ -186,6 +186,10 @@ export function VaultV1(props: {
 			? zeroNormalizedBN
 			: toNormalizedBN(decodeAsBigInt(onChainData[1]), vault.decimals);
 
+		const rewardEarned = isZeroAddress(address)
+			? zeroNormalizedBN
+			: toNormalizedBN(decodeAsBigInt(onChainData[5]), 18);
+
 		set_onChainVault({
 			totalVaultSupply: toNormalizedBN(decodeAsBigInt(onChainData[0]), vault.decimals),
 			vaultBalanceOf,
@@ -196,9 +200,7 @@ export function VaultV1(props: {
 			stakingBalanceOf: isZeroAddress(address)
 				? zeroNormalizedBN
 				: toNormalizedBN(decodeAsBigInt(onChainData[4]), vault.decimals),
-			rewardEarned: isZeroAddress(address)
-				? zeroNormalizedBN
-				: toNormalizedBN(decodeAsBigInt(onChainData[5]), 18),
+			rewardEarned,
 			autoCoumpoundingVaultSupply,
 			autoCoumpoundingVaultBalance,
 			weeklyStakingRewards: rewardsPerWeek,
@@ -219,17 +221,19 @@ export function VaultV1(props: {
 			(autoCoumpoundingVaultSupply?.normalized || 0) * (pricesForVault?.vaultToken.normalized || 0);
 		const rewardTvl = (rewardContractTotalSupply?.normalized || 0) * (pricesForVault?.vaultToken.normalized || 0);
 
-		const rewardsValue = rewardsPerWeek * (pricesForVault?.rewardToken.normalized || 0);
+		const rewardValue = rewardsPerWeek * (pricesForVault?.rewardToken.normalized || 0);
+		const rewardClaimable = rewardEarned.normalized * (pricesForVault?.rewardToken.normalized || 0);
 
 		const apr = expectedAutoCompoundAPR + extraAPR;
 
 		if (isNumber(apr)) {
-			registerNewVault({
+			registerNewVault?.({
 				vaultAddress: vault.vaultAddress,
 				totalDeposit: vaultDeposit + rewardsDeposit + autoCompoundingDeposit,
 				apr,
 				tvl: autoCompoundTvl + rewardTvl,
-				rewardsValue,
+				rewardValue,
+				rewardClaimable,
 				isFetched: true
 			});
 		}
@@ -246,35 +250,26 @@ export function VaultV1(props: {
 		extraAPR
 	]);
 
+	if (isListView) {
+		return (
+			<ListViewVault
+				vault={vault}
+				prices={pricesForVault}
+				yDaemonData={yDaemonVault as TYDaemonVault}
+				onChainData={onChainVault}
+				expectedAutoCompoundAPR={expectedAutoCompoundAPR}
+				onRefreshVaultData={onRefreshVaultData}
+			/>
+		);
+	}
 	return (
-		<div className={'flex flex-col gap-8 rounded-lg border-4 border-neutral-900 p-4 md:px-8 md:py-6'}>
-			<div className={'flex gap-4'}>
-				<div
-					className={cl(
-						'grid grid-cols-1 gap-y-6 gap-x-0 md:grid-cols-2 md:gap-x-6 md:gap-y-0 w-full h-full'
-					)}>
-					<VaultBasicDeposit
-						vault={{
-							...vault,
-							prices: pricesForVault,
-							onChainData: onChainVault,
-							yDaemonData: yDaemonVault as TYDaemonVault,
-							autoCompoundingAPR: 0
-						}}
-						onRefreshVaultData={onRefreshVaultData}
-					/>
-					<VaultChoiceWrapper
-						vault={{
-							...vault,
-							prices: pricesForVault,
-							onChainData: onChainVault,
-							yDaemonData: yDaemonVault as TYDaemonVault,
-							autoCompoundingAPR: expectedAutoCompoundAPR
-						}}
-						onRefreshVaultData={onRefreshVaultData}
-					/>
-				</div>
-			</div>
-		</div>
+		<GridViewVault
+			vault={vault}
+			prices={pricesForVault}
+			yDaemonData={yDaemonVault as TYDaemonVault}
+			onChainData={onChainVault}
+			expectedAutoCompoundAPR={expectedAutoCompoundAPR}
+			onRefreshVaultData={onRefreshVaultData}
+		/>
 	);
 }
