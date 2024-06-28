@@ -1,5 +1,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import toast from 'react-hot-toast';
+import {erc20Abi} from 'viem';
 import {useReadContract} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {
@@ -20,7 +21,6 @@ import {IconGold} from '@icons/IconGold';
 import {IconSpinner} from '@icons/IconSpinner';
 import {claimRewards, exit, unstakeSome, zapIn} from '@utils/actions';
 import {convertToYVToken, formatVaultAPR, onInput} from '@utils/helpers';
-import {erc20ABI} from '@wagmi/core';
 import {Counter} from '@common/Counter';
 
 import type {ReactElement} from 'react';
@@ -37,7 +37,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 	const [depositStatus, set_depositStatus] = useState(defaultTxStatus);
 
 	const {data: hasAllowance, refetch: onRefreshAllowance} = useReadContract({
-		abi: erc20ABI,
+		abi: erc20Abi,
 		chainId: props.vault.chainID,
 		address: props.vault.tokenAddress,
 		functionName: 'allowance',

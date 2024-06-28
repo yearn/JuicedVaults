@@ -1,6 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {GridViewVault} from 'components/v1/GridViewVault';
 import {ListViewVault} from 'components/v1/ListViewVault';
+import {erc20Abi} from 'viem';
 import {useReadContracts} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {useFetch} from '@builtbymom/web3/hooks/useFetch';
@@ -17,7 +18,6 @@ import {useIntervalEffect} from '@react-hookz/web';
 import {YVAULT_STAKING_ABI} from '@utils/abi/yVaultStaking.abi';
 import {YVAULT_V3_ABI} from '@utils/abi/yVaultV3.abi';
 import {getVaultAPR, toSafeChainID} from '@utils/helpers';
-import {erc20ABI} from '@wagmi/core';
 import {useYDaemonBaseURI} from '@yearn-finance/web-lib/hooks/useYDaemonBaseURI';
 import {yDaemonVaultSchema} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
 
@@ -65,7 +65,7 @@ export function VaultV1(props: {
 			},
 			//Underlying token info
 			{
-				abi: erc20ABI,
+				abi: erc20Abi,
 				chainId: vault.chainID,
 				address: vault.tokenAddress,
 				functionName: 'balanceOf',

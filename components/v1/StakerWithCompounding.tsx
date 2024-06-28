@@ -1,5 +1,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import toast from 'react-hot-toast';
+import {erc20Abi} from 'viem';
 import {useReadContract} from 'wagmi';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {
@@ -21,7 +22,6 @@ import {IconBigChevron} from '@icons/IconBigChevron';
 import {IconSpinner} from '@icons/IconSpinner';
 import {depositERC20, redeemV3Shares} from '@utils/actions';
 import {convertToYVToken, convertToYVYVToken, formatVaultAPR, onInput} from '@utils/helpers';
-import {erc20ABI} from '@wagmi/core';
 
 import type {ReactElement} from 'react';
 import type {TNormalizedBN} from '@builtbymom/web3/types';
@@ -48,7 +48,7 @@ function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () => void}
 	]);
 
 	const {data: hasAllowance, refetch: onRefreshAllowance} = useReadContract({
-		abi: erc20ABI,
+		abi: erc20Abi,
 		chainId: props.vault.chainID,
 		address: props.vault.vaultAddress,
 		functionName: 'allowance',
