@@ -166,6 +166,7 @@ export function VaultV1(props: {
 			return;
 		}
 
+		const periodFinish = toBigInt(onChainData?.[6]?.result?.[2]);
 		const rewardRate = toNormalizedBN(toBigInt(onChainData?.[6]?.result?.[3]), 18);
 		const rewardDuration = toBigInt(onChainData?.[6]?.result?.[1]);
 		const rewardsPerWeek = rewardRate.normalized * Number(rewardDuration);
@@ -175,20 +176,17 @@ export function VaultV1(props: {
 		const autoCoumpoundingVaultBalance = isZeroAddress(address)
 			? zeroNormalizedBN
 			: toNormalizedBN(decodeAsBigInt(onChainData[8]), vault.decimals);
-
 		const stakingBalanceOf = isZeroAddress(address)
 			? zeroNormalizedBN
 			: toNormalizedBN(decodeAsBigInt(onChainData[4]), vault.decimals);
-
 		const autoCoumpoundingVaultSupply = toNormalizedBN(decodeAsBigInt(onChainData[7]), vault.decimals);
-
 		const vaultBalanceOf = isZeroAddress(address)
 			? zeroNormalizedBN
 			: toNormalizedBN(decodeAsBigInt(onChainData[1]), vault.decimals);
-
 		const rewardEarned = isZeroAddress(address)
 			? zeroNormalizedBN
 			: toNormalizedBN(decodeAsBigInt(onChainData[5]), 18);
+		const isFinished = periodFinish < Date.now() / 1000;
 
 		set_onChainVault({
 			totalVaultSupply: toNormalizedBN(decodeAsBigInt(onChainData[0]), vault.decimals),
@@ -203,7 +201,7 @@ export function VaultV1(props: {
 			rewardEarned,
 			autoCoumpoundingVaultSupply,
 			autoCoumpoundingVaultBalance,
-			weeklyStakingRewards: rewardsPerWeek,
+			weeklyStakingRewards: isFinished ? 0 : rewardsPerWeek,
 			vaultPricePerShare,
 			autoCompoundingVaultPricePerShare
 		});
