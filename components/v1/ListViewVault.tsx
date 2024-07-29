@@ -97,9 +97,11 @@ export function ListViewVault(props: TVaultUIProps): ReactElement {
 						<span
 							suppressHydrationWarning
 							className={'col-span-2 flex flex-col gap-2'}>
-							{`${formatWithUnit(Number(onChainData?.weeklyStakingRewards || 0), 0, 0, {
-								locales: ['en-US']
-							})}/week`}
+							{onChainData?.weeklyStakingRewards === 0
+								? 'None'
+								: `${formatWithUnit(Number(onChainData?.weeklyStakingRewards || 0), 0, 0, {
+										locales: ['en-US']
+									})}/week`}
 							<span
 								suppressHydrationWarning
 								className={'col-span-2 text-xs font-normal text-neutral-700'}>
