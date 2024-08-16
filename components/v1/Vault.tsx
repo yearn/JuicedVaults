@@ -125,6 +125,12 @@ export function VaultV1(props: {
 				chainId: vault.chainID,
 				address: vault.autoCompoundingAddress,
 				functionName: 'pricePerShare'
+			},
+			{
+				abi: YVAULT_V3_ABI,
+				chainId: vault.chainID,
+				address: vault.vaultAddress,
+				functionName: 'unlockedShares'
 			}
 		]
 	});
@@ -203,7 +209,8 @@ export function VaultV1(props: {
 			autoCoumpoundingVaultBalance,
 			weeklyStakingRewards: isFinished ? 0 : rewardsPerWeek,
 			vaultPricePerShare,
-			autoCompoundingVaultPricePerShare
+			autoCompoundingVaultPricePerShare,
+			unlockedShares: toNormalizedBN(decodeAsBigInt(onChainData[11]), vault.decimals)
 		});
 
 		const autoCompoundingDeposit =

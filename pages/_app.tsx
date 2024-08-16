@@ -6,7 +6,6 @@ import {gnosis, mainnet, polygon} from 'viem/chains';
 import {WalletContextApp} from '@builtbymom/web3/contexts/useWallet';
 import {WithMom} from '@builtbymom/web3/contexts/WithMom';
 import {cl} from '@builtbymom/web3/utils';
-import {localhost} from '@builtbymom/web3/utils/wagmi/networks';
 import IconCheck from '@icons/IconCheck';
 import IconCircleCross from '@icons/IconCircleCross';
 import {Header} from '@common/Header';
@@ -33,6 +32,8 @@ const aeonik = localFont({
 		}
 	]
 });
+
+const supportedChains = [mainnet, polygon, gnosis];
 
 function MyApp({Component, ...props}: AppProps): ReactElement {
 	const [sticky, set_sticky] = useState({isSticky: false, offset: 0});
@@ -86,7 +87,7 @@ function MyApp({Component, ...props}: AppProps): ReactElement {
 			</Head>
 			<Meta />
 			<WithMom
-				supportedChains={[mainnet, polygon, gnosis, localhost]}
+				supportedChains={supportedChains}
 				tokenLists={[
 					'https://raw.githubusercontent.com/SmolDapp/tokenLists/main/lists/yearn.json',
 					'https://raw.githubusercontent.com/SmolDapp/tokenLists/main/lists/ajna.json'

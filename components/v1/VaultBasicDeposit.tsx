@@ -73,7 +73,7 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 		}
 	}, [approveStatus.pending, provider, props, onRefreshAllowance]);
 
-	const onDeposit = useCallback(async (): Promise<void> => {
+	const onDeposit = useCallback(async () => {
 		const result = await depositERC20({
 			connector: provider,
 			chainID: props.vault.chainID,
@@ -200,7 +200,7 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 		props.vault.decimals
 	]);
 
-	const onWithdraw = useCallback(async (): Promise<void> => {
+	const onWithdraw = useCallback(async () => {
 		let actualValue = convertToYVToken(
 			amount?.raw || 0n,
 			props.vault.decimals,
@@ -209,6 +209,7 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 		if (isMax) {
 			actualValue = props.vault.onChainData?.vaultBalanceOf || zeroNormalizedBN;
 		}
+
 		const result = await redeemV3Shares({
 			connector: provider,
 			chainID: props.vault.chainID,
@@ -269,13 +270,23 @@ function WithdrawSection(props: {vault: TVaultData; onRefreshVaultData: () => vo
 			</div>
 			<button
 				suppressHydrationWarning
-				disabled={!actualBalanceInToken || actualBalanceInToken.raw === 0n}
+				disabled={
+					!actualBalanceInToken ||
+					actualBalanceInToken.raw === 0n ||
+					toBigInt(props.vault?.onChainData?.unlockedShares?.raw) === 0n
+				}
 				onClick={() => {
-					set_amount(actualBalanceInToken || zeroNormalizedBN);
-					set_isMax(true);
+					if (actualBalanceInToken.raw <= toBigInt(props.vault?.onChainData?.unlockedShares?.raw)) {
+						set_amount(actualBalanceInToken || zeroNormalizedBN);
+						set_isMax(true);
+					} else {
+						set_amount(props.vault?.onChainData?.unlockedShares || zeroNormalizedBN);
+					}
 				}}
 				className={'mt-1 block pl-2 text-xs text-neutral-900'}>
-				{`${formatAmount(actualBalanceInToken?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to withdraw`}
+				{actualBalanceInToken.raw > toBigInt(props.vault?.onChainData?.unlockedShares?.raw)
+					? `${formatAmount(actualBalanceInToken?.normalized || 0, 4)} ${props.vault.tokenSymbol} deposited | ${formatAmount(props.vault?.onChainData?.unlockedShares.normalized || 0, 4)} ${props.vault.tokenSymbol} available to withdraw`
+					: `${formatAmount(actualBalanceInToken?.normalized || 0, 4)} ${props.vault.tokenSymbol} available to withdraw`}
 			</button>
 		</div>
 	);

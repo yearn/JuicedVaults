@@ -34,6 +34,7 @@ export type TVaultOnchainData = {
 	autoCoumpoundingVaultSupply: TNormalizedBN;
 	autoCoumpoundingVaultBalance: TNormalizedBN;
 	weeklyStakingRewards: number;
+	unlockedShares: TNormalizedBN;
 };
 
 export type TVaultData = TVaultListItem & {
