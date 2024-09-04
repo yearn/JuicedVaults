@@ -6,7 +6,7 @@ import type {ReactElement} from 'react';
 import type {TVaultUIProps} from '@utils/types';
 
 export function GridViewVault(props: TVaultUIProps): ReactElement {
-	const {vault, prices, onChainData, yDaemonData, onRefreshVaultData, expectedAutoCompoundAPR} = props;
+	const {vault, prices, onChainData, yDaemonData, onRefreshVaultData, expectedAutoCompoundAPY} = props;
 
 	return (
 		<div className={'flex flex-col gap-8 rounded-lg border-4 border-neutral-900 p-4 lg:px-8 lg:py-6'}>
@@ -21,7 +21,7 @@ export function GridViewVault(props: TVaultUIProps): ReactElement {
 							prices,
 							onChainData,
 							yDaemonData,
-							autoCompoundingAPR: 0
+							autoCompoundingAPY: 0
 						}}
 						onRefreshVaultData={onRefreshVaultData}
 					/>
@@ -31,7 +31,7 @@ export function GridViewVault(props: TVaultUIProps): ReactElement {
 							prices,
 							onChainData,
 							yDaemonData,
-							autoCompoundingAPR: expectedAutoCompoundAPR
+							autoCompoundingAPY: expectedAutoCompoundAPY
 						}}
 						onRefreshVaultData={onRefreshVaultData}
 					/>

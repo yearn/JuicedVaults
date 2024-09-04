@@ -20,7 +20,7 @@ import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {IconGold} from '@icons/IconGold';
 import {IconSpinner} from '@icons/IconSpinner';
 import {claimRewards, exit, unstakeSome, zapIn} from '@utils/actions';
-import {convertToYVToken, formatVaultAPR, onInput} from '@utils/helpers';
+import {convertToYVToken, formatVaultAPY, onInput} from '@utils/helpers';
 import {Counter} from '@common/Counter';
 
 import type {ReactElement} from 'react';
@@ -429,8 +429,8 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 					suppressHydrationWarning
 					className={'block pb-2 text-neutral-900'}>
 					{'Rewards: '}
-					{formatVaultAPR(props?.vault?.yDaemonData)}
-					{' APR +'}
+					{formatVaultAPY(props?.vault?.yDaemonData)}
+					{' APY +'}
 				</b>
 				<b
 					suppressHydrationWarning
@@ -481,7 +481,7 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 						suppressHydrationWarning
 						className={'block text-sm text-neutral-900'}>
 						{`Extra ${props.vault.rewardSymbol}: `}
-						{formatVaultAPR(props?.vault?.yDaemonData)}
+						{formatVaultAPY(props?.vault?.yDaemonData)}
 						{' +'}
 					</p>
 					<b

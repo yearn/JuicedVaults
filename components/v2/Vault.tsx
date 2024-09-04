@@ -17,7 +17,7 @@ import {
 import {useIntervalEffect} from '@react-hookz/web';
 import {YVAULT_STAKING_ABI} from '@utils/abi/yVaultStaking.abi';
 import {YVAULT_V3_ABI} from '@utils/abi/yVaultV3.abi';
-import {getVaultAPR, toSafeChainID} from '@utils/helpers';
+import {getVaultAPY, toSafeChainID} from '@utils/helpers';
 import {useYDaemonBaseURI} from '@yearn-finance/web-lib/hooks/useYDaemonBaseURI';
 import {yDaemonVaultSchema} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
 
@@ -148,16 +148,16 @@ export function VaultV2(props: {
 		};
 	}, [prices, vault.chainID, vault.rewardAddress, vault.tokenAddress, vault.vaultAddress]);
 
-	const expectedAutoCompoundAPR = useMemo((): number => {
+	const expectedAutoCompoundAPY = useMemo((): number => {
 		const weeklyRewards = Number(onChainVault?.weeklyStakingRewards || 0);
 		const priceOfRewardToken = Number(pricesForVault?.rewardToken?.normalized || 0);
 		const vaultTotalSupply = Number(onChainVault?.totalVaultSupply?.normalized || 0);
 		const vaultTokenPrice = Number(pricesForVault?.vaultToken?.normalized || 0);
-		const expectedAPR = ((weeklyRewards * priceOfRewardToken) / (vaultTotalSupply * vaultTokenPrice)) * 52 * 100;
-		if (isNaN(expectedAPR)) {
+		const expectedAPY = ((weeklyRewards * priceOfRewardToken) / (vaultTotalSupply * vaultTokenPrice)) * 52 * 100;
+		if (isNaN(expectedAPY)) {
 			return 0;
 		}
-		return expectedAPR;
+		return expectedAPY;
 	}, [
 		onChainVault?.totalVaultSupply?.normalized,
 		onChainVault?.weeklyStakingRewards,
@@ -165,7 +165,7 @@ export function VaultV2(props: {
 		pricesForVault?.vaultToken?.normalized
 	]);
 
-	const extraAPR = getVaultAPR(yDaemonVault);
+	const extraAPY = getVaultAPY(yDaemonVault);
 
 	useEffect(() => {
 		if (!onChainData) {
@@ -230,13 +230,13 @@ export function VaultV2(props: {
 		const rewardValue = rewardsPerWeek * (pricesForVault?.rewardToken.normalized || 0);
 		const rewardClaimable = rewardEarned.normalized * (pricesForVault?.rewardToken.normalized || 0);
 
-		const apr = expectedAutoCompoundAPR + extraAPR;
+		const APY = expectedAutoCompoundAPY + extraAPY;
 
-		if (isNumber(apr)) {
+		if (isNumber(APY)) {
 			registerNewVault?.({
 				vaultAddress: vault.vaultAddress,
 				totalDeposit: autoCompoundingDeposit + rewardsDeposit,
-				apr,
+				APY,
 				tvl: autoCompoundTvl + rewardTvl,
 				rewardValue,
 				rewardClaimable,
@@ -250,9 +250,9 @@ export function VaultV2(props: {
 		vault.vaultAddress,
 		vault.decimals,
 		registerNewVault,
-		expectedAutoCompoundAPR,
+		expectedAutoCompoundAPY,
 		pricesForVault,
-		extraAPR
+		extraAPY
 	]);
 
 	if (isListView) {
@@ -262,7 +262,7 @@ export function VaultV2(props: {
 				prices={pricesForVault}
 				yDaemonData={yDaemonVault as TYDaemonVault}
 				onChainData={onChainVault}
-				expectedAutoCompoundAPR={expectedAutoCompoundAPR}
+				expectedAutoCompoundAPY={expectedAutoCompoundAPY}
 				onRefreshVaultData={onRefreshVaultData}
 			/>
 		);
@@ -273,7 +273,7 @@ export function VaultV2(props: {
 			prices={pricesForVault}
 			yDaemonData={yDaemonVault as TYDaemonVault}
 			onChainData={onChainVault}
-			expectedAutoCompoundAPR={expectedAutoCompoundAPR}
+			expectedAutoCompoundAPY={expectedAutoCompoundAPY}
 			onRefreshVaultData={onRefreshVaultData}
 		/>
 	);

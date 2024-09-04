@@ -67,12 +67,12 @@ function Home(): ReactElement {
 			});
 		}
 
-		if (queryArguments.filter === 'apr') {
+		if (queryArguments.filter === 'apy') {
 			return clonedVaults.sort((a, b) => {
 				const vaultAData = vaultsData[a.vaultAddress];
 				const vaultBData = vaultsData[b.vaultAddress];
 
-				return vaultBData.apr - vaultAData.apr;
+				return vaultBData.APY - vaultAData.APY;
 			});
 		}
 
@@ -103,7 +103,7 @@ function Home(): ReactElement {
 			const aDeposited = vaultAData.totalDeposit || 0;
 			const bDeposited = vaultBData.totalDeposit || 0;
 
-			return bDeposited - aDeposited || vaultBData.apr - vaultAData.apr;
+			return bDeposited - aDeposited || vaultBData.APY - vaultAData.APY;
 		});
 	}, [queryArguments, vaultsData, isAllVaultsLoaded]);
 

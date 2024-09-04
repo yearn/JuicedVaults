@@ -41,14 +41,14 @@ export type TVaultData = TVaultListItem & {
 	onChainData: TVaultOnchainData | undefined;
 	prices: TPriceData | undefined;
 	yDaemonData: TYDaemonVault;
-	autoCompoundingAPR: number;
+	autoCompoundingAPY: number;
 };
 
 export type TVault = {
 	totalDeposit: number;
 	vaultAddress: TAddress;
 	isFetched: boolean;
-	apr: number;
+	APY: number;
 	tvl: number;
 	rewardValue: number;
 	rewardClaimable: number;
@@ -60,5 +60,5 @@ export type TVaultUIProps = {
 	prices?: TPriceData;
 	yDaemonData: TYDaemonVault;
 	onRefreshVaultData: () => void;
-	expectedAutoCompoundAPR: number;
+	expectedAutoCompoundAPY: number;
 };

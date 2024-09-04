@@ -5,7 +5,7 @@ import {cl} from '@builtbymom/web3/utils';
 
 import type {ChangeEvent, Dispatch, FormEvent, ReactElement, SetStateAction} from 'react';
 
-type TPossibleFilters = 'incentive' | 'tvl' | 'deposited' | 'claimable' | 'apr' | undefined;
+type TPossibleFilters = 'incentive' | 'tvl' | 'deposited' | 'claimable' | 'apy' | undefined;
 export type TQuery = {
 	filter?: TPossibleFilters;
 	search?: string;
@@ -172,12 +172,12 @@ function SearchBar({
 						{'Deposited'}
 					</button>
 					<button
-						id={'trigger-filterAPR'}
-						onClick={() => triggerFilter('apr')}
+						id={'trigger-filterAPY'}
+						onClick={() => triggerFilter('apy')}
 						className={`hover-fix text-sm md:text-base ${
-							queryArguments.filter === 'apr' ? 'font-bold underline' : ''
+							queryArguments.filter === 'apy' ? 'font-bold underline' : ''
 						}`}>
-						{'APR'}
+						{'APY'}
 					</button>
 					<button
 						id={'trigger-filterIncentive'}

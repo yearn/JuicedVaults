@@ -26,9 +26,9 @@ export function ListViewHeader({
 			</div>
 			<div className={cl('grid w-4/12 grid-cols-6 gap-2', isListView ? '' : 'invisible pointer-events-none')}>
 				<button
-					onClick={() => document.getElementById('trigger-filterAPR')?.click()}
+					onClick={() => document.getElementById('trigger-filterAPY')?.click()}
 					className={'col-span-2 text-left text-xs'}>
-					{'APR'}
+					{'APY'}
 				</button>
 				<button
 					onClick={() => document.getElementById('trigger-filterIncentive')?.click()}

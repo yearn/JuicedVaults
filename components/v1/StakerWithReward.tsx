@@ -20,7 +20,7 @@ import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {IconBigChevron} from '@icons/IconBigChevron';
 import {IconSpinner} from '@icons/IconSpinner';
 import {claimRewards, exit, stakeERC20, unstakeSome} from '@utils/actions';
-import {convertToYVToken, formatVaultAPR, onInput} from '@utils/helpers';
+import {convertToYVToken, formatVaultAPY, onInput} from '@utils/helpers';
 import {Counter} from '@common/Counter';
 
 import type {ReactElement} from 'react';
@@ -449,7 +449,7 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 					suppressHydrationWarning
 					className={'block pb-2 text-neutral-900'}>
 					{`Extra ${props.vault.rewardSymbol}: `}
-					{formatVaultAPR(props?.vault?.yDaemonData)}
+					{formatVaultAPY(props?.vault?.yDaemonData)}
 					{' +'}
 				</b>
 				<b
@@ -499,7 +499,7 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 					<p
 						className={'block text-xl text-neutral-900'}
 						suppressHydrationWarning>
-						{`Deposit on the left and *poof* you can juice your tokens with extra APR or extra ${props.vault.rewardSymbol}.`}
+						{`Deposit on the left and *poof* you can juice your tokens with extra APY or extra ${props.vault.rewardSymbol}.`}
 					</p>
 				</div>
 			)}
@@ -516,7 +516,7 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 						suppressHydrationWarning
 						className={'block text-sm text-neutral-900'}>
 						{`Extra ${props.vault.rewardSymbol}: `}
-						{formatVaultAPR(props?.vault?.yDaemonData)}
+						{formatVaultAPY(props?.vault?.yDaemonData)}
 						{' +'}
 					</p>
 					<b

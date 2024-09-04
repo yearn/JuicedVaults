@@ -9,7 +9,7 @@ import type {ReactElement} from 'react';
 import type {TVaultUIProps} from '@utils/types';
 
 export function GridViewVault(props: TVaultUIProps): ReactElement {
-	const {vault, prices, onChainData, yDaemonData, onRefreshVaultData, expectedAutoCompoundAPR} = props;
+	const {vault, prices, onChainData, yDaemonData, onRefreshVaultData, expectedAutoCompoundAPY} = props;
 
 	const blockExplorer = useBlockExplorer(vault.chainID);
 
@@ -28,7 +28,7 @@ export function GridViewVault(props: TVaultUIProps): ReactElement {
 					<p>
 						{'Choose '}
 						<b className={'text-blue'}>{'Auto Compounding'}</b>
-						{' to enjoy boosted APR, or '}
+						{' to enjoy boosted APY, or '}
 						<b className={'text-yellowHover'}>{'Manual Claim'}</b>{' '}
 						{'if you want to claim your tokens yourself.'}
 					</p>
@@ -41,7 +41,7 @@ export function GridViewVault(props: TVaultUIProps): ReactElement {
 						prices: prices,
 						onChainData,
 						yDaemonData,
-						autoCompoundingAPR: expectedAutoCompoundAPR
+						autoCompoundingAPY: expectedAutoCompoundAPY
 					}}
 					onRefreshVaultData={onRefreshVaultData}
 				/>
@@ -51,7 +51,7 @@ export function GridViewVault(props: TVaultUIProps): ReactElement {
 						prices,
 						onChainData,
 						yDaemonData,
-						autoCompoundingAPR: expectedAutoCompoundAPR
+						autoCompoundingAPY: expectedAutoCompoundAPY
 					}}
 					onRefreshVaultData={onRefreshVaultData}
 				/>

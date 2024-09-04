@@ -34,7 +34,7 @@ export function VaultChoiceWrapper(props: {vault: TVaultData; onRefreshVaultData
 							)}>
 							<IconRecycle className={'size-8'} />
 						</div>
-						<b className={'text-base text-neutral-900 lg:text-xl'}>{'Extra APR'}</b>
+						<b className={'text-base text-neutral-900 lg:text-xl'}>{'Extra APY'}</b>
 					</button>
 					<button
 						onClick={() => set_selectedTab(1)}

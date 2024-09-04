@@ -20,7 +20,7 @@ import {
 import {approveERC20, defaultTxStatus, getNetwork} from '@builtbymom/web3/utils/wagmi';
 import {IconSpinner} from '@icons/IconSpinner';
 import {depositERC20, redeemV3Shares} from '@utils/actions';
-import {convertToYVToken, formatVaultAPR, onInput, toSafeChainID} from '@utils/helpers';
+import {convertToYVToken, formatVaultAPY, onInput, toSafeChainID} from '@utils/helpers';
 import {ImageWithFallback} from '@common/ImageWithFallback';
 
 import type {ReactElement} from 'react';
@@ -86,7 +86,7 @@ function DepositSection(props: {vault: TVaultData; onRefreshVaultData: () => voi
 			props.onRefreshVaultData();
 			set_amount(undefined);
 			toast.success(
-				`You successfully deposited ${amount?.normalized} ${props.vault.tokenSymbol}. Now stake them for more APR or more ${props.vault.rewardSymbol}`
+				`You successfully deposited ${amount?.normalized} ${props.vault.tokenSymbol}. Now stake them for more APY or more ${props.vault.rewardSymbol}`
 			);
 		}
 	}, [provider, props, amount?.raw, amount?.normalized, onRefreshAllowance]);
@@ -321,11 +321,11 @@ export function DesktopStats(props: {vault: TVaultData}): ReactElement {
 	return (
 		<div className={'hidden grid-cols-2 gap-4 pt-0.5 lg:grid'}>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4 leading-4'}>
-				<b className={'block pb-2 text-beige'}>{'APR'}</b>
+				<b className={'block pb-2 text-beige'}>{'APY'}</b>
 				<b
 					suppressHydrationWarning
 					className={'block text-3xl text-beige'}>
-					{formatVaultAPR(props?.vault?.yDaemonData)}
+					{formatVaultAPY(props?.vault?.yDaemonData)}
 				</b>
 			</div>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4 leading-4'}>
@@ -371,11 +371,11 @@ export function MobileStats(props: {vault: TVaultData}): ReactElement {
 		<div className={'grid lg:hidden'}>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-carbon p-4'}>
 				<div className={'flex items-center justify-between'}>
-					<p className={'block text-sm text-beige'}>{'APR'}</p>
+					<p className={'block text-sm text-beige'}>{'APY'}</p>
 					<b
 						className={'block text-beige'}
 						suppressHydrationWarning>
-						{formatVaultAPR(props?.vault?.yDaemonData)}
+						{formatVaultAPY(props?.vault?.yDaemonData)}
 					</b>
 				</div>
 				<div className={'flex items-center justify-between'}>
@@ -421,7 +421,7 @@ export function VaultBasicDeposit(props: {vault: TVaultData; onRefreshVaultData:
 				/>
 				<b className={'block whitespace-break-spaces text-lg text-neutral-900 lg:text-xl'}>
 					{`Deposit ${props.vault.tokenSymbol} and then stake for `}
-					<span className={'text-blue'}>{'more APR'}</span>
+					<span className={'text-blue'}>{'more APY'}</span>
 					{' or '}
 					<span className={'text-orange'}>{`more ${props.vault.rewardSymbol}`}</span>
 					{'.'}

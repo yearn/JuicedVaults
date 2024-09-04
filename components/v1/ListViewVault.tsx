@@ -3,7 +3,7 @@ import Link from 'next/link';
 import {GridViewVault} from 'components/v1/GridViewVault';
 import {cl, formatAmount, formatPercent, formatWithUnit} from '@builtbymom/web3/utils';
 import {getNetwork} from '@builtbymom/web3/utils/wagmi';
-import {getVaultAPR, toSafeChainID} from '@utils/helpers';
+import {getVaultAPY, toSafeChainID} from '@utils/helpers';
 import {Counter} from '@common/Counter';
 import {ImageWithFallback} from '@common/ImageWithFallback';
 
@@ -35,16 +35,16 @@ export function ListViewVault(props: TVaultUIProps): ReactElement {
 		return onChainData?.totalVaultSupply?.normalized || 0;
 	}, [onChainData?.totalVaultSupply]);
 
-	const expectedAutoCompoundAPR = useMemo((): number => {
+	const expectedAutoCompoundAPY = useMemo((): number => {
 		const weeklyRewards = Number(onChainData?.weeklyStakingRewards || 0);
 		const priceOfRewardToken = Number(prices?.rewardToken?.normalized || 0);
 		const vaultTotalSupply = Number(onChainData?.totalVaultSupply?.normalized || 0);
 		const vaultTokenPrice = Number(prices?.vaultToken?.normalized || 0);
-		const expectedAPR = ((weeklyRewards * priceOfRewardToken) / (vaultTotalSupply * vaultTokenPrice)) * 52 * 100;
-		if (isNaN(expectedAPR)) {
+		const expectedAPY = ((weeklyRewards * priceOfRewardToken) / (vaultTotalSupply * vaultTokenPrice)) * 52 * 100;
+		if (isNaN(expectedAPY)) {
 			return 0;
 		}
-		return expectedAPR;
+		return expectedAPY;
 	}, [
 		onChainData?.totalVaultSupply?.normalized,
 		onChainData?.weeklyStakingRewards,
@@ -52,9 +52,8 @@ export function ListViewVault(props: TVaultUIProps): ReactElement {
 		prices?.vaultToken?.normalized
 	]);
 
-	const extraAPR = getVaultAPR(yDaemonData);
-
-	const apr = expectedAutoCompoundAPR + extraAPR;
+	const extraAPY = getVaultAPY(yDaemonData);
+	const apy = expectedAutoCompoundAPY + extraAPY;
 
 	return (
 		<>
@@ -92,7 +91,7 @@ export function ListViewVault(props: TVaultUIProps): ReactElement {
 						<span
 							suppressHydrationWarning
 							className={'col-span-2 flex flex-col gap-2'}>
-							{formatPercent(apr)}
+							{formatPercent(apy)}
 						</span>
 						<span
 							suppressHydrationWarning

@@ -21,7 +21,7 @@ import {approveERC20, defaultTxStatus} from '@builtbymom/web3/utils/wagmi';
 import {IconRecycle} from '@icons/IconRecycle';
 import {IconSpinner} from '@icons/IconSpinner';
 import {depositERC20, redeemV3Shares} from '@utils/actions';
-import {convertToYVToken, formatVaultAPR, onInput} from '@utils/helpers';
+import {convertToYVToken, formatVaultAPY, onInput} from '@utils/helpers';
 
 import type {ReactElement} from 'react';
 import type {TNormalizedBN} from '@builtbymom/web3/types';
@@ -70,7 +70,7 @@ export function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () =
 			onRefreshAllowance();
 			props.onRefreshVaultData();
 			toast.success(
-				`Your ${props.vault.tokenSymbol} has been approved. Now click stake and start earning more APR.`
+				`Your ${props.vault.tokenSymbol} has been approved. Now click stake and start earning more APY.`
 			);
 		}
 	}, [approveStatus.pending, provider, props, onRefreshAllowance]);
@@ -96,7 +96,7 @@ export function StakeSection(props: {vault: TVaultData; onRefreshVaultData: () =
 			props.onRefreshVaultData();
 			set_amount(undefined);
 			toast.success(
-				`You staked ${amount?.normalized} ${props.vault.tokenSymbol} and are now earning juiced APR.`
+				`You staked ${amount?.normalized} ${props.vault.tokenSymbol} and are now earning juiced APY.`
 			);
 		}
 	}, [amount?.raw, amount?.normalized, isMax, provider, props, onRefreshAllowance]);
@@ -315,12 +315,12 @@ function DesktopStats(props: {vault: TVaultData}): ReactElement {
 				<b
 					suppressHydrationWarning
 					className={'block pb-2 text-neutral-900'}>
-					{'APR '}
+					{'APY '}
 				</b>
 				<b
 					suppressHydrationWarning
 					className={'block text-3xl text-neutral-900'}>
-					{formatPercent(props.vault.autoCompoundingAPR, 2)}
+					{formatPercent(props.vault.autoCompoundingAPY, 2)}
 				</b>
 			</div>
 			<div className={'rounded-lg border-2 border-neutral-900 bg-beige p-4 leading-4'}>
@@ -374,14 +374,14 @@ function MobileStats(props: {vault: TVaultData}): ReactElement {
 					<p
 						suppressHydrationWarning
 						className={'block text-sm text-neutral-900'}>
-						{'Extra APR: '}
-						{formatVaultAPR(props?.vault?.yDaemonData)}
+						{'Extra APY: '}
+						{formatVaultAPY(props?.vault?.yDaemonData)}
 						{' +'}
 					</p>
 					<b
 						className={'block text-neutral-900'}
 						suppressHydrationWarning>
-						{formatPercent(props.vault.autoCompoundingAPR, 2)}
+						{formatPercent(props.vault.autoCompoundingAPY, 2)}
 					</b>
 				</div>
 				<div className={'flex items-center justify-between'}>
