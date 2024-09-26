@@ -130,7 +130,8 @@ export function VaultV1(props: {
 				abi: YVAULT_V3_ABI,
 				chainId: vault.chainID,
 				address: vault.vaultAddress,
-				functionName: 'unlockedShares'
+				functionName: 'maxWithdraw',
+				args: [toAddress(address)]
 			}
 		]
 	});
