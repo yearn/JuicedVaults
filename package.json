@@ -67,10 +67,13 @@
     "postcss-nesting": "12.1.5",
     "prettier": "3.3.3",
     "sass": "1.77.8",
-    "sharp": "0.33.4",
+    "sharp": "0.35.5",
     "stylelint": "16.8.2",
     "stylelint-config-standard": "36.0.1",
     "ts-loader": "9.5.1",
     "typescript": "5.5.4"
+  },
+  "overrides": {
+    "sharp": "0.35.5"
   }
 }
